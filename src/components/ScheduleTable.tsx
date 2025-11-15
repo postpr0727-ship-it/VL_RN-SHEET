@@ -78,6 +78,7 @@ export default function ScheduleTable({
 
   const renderRow = (nurse: NurseType, index: number) => {
     const isNightSpecialist = nurse === "G" || nurse === "H";
+    const isManager = nurse === "E" || nurse === "F";
     const label = nurseLabels[nurse]?.trim() || nurse;
 
     return (
@@ -93,6 +94,14 @@ export default function ScheduleTable({
             <span className="text-[10px] text-slate-500 tracking-wide">
               ID: {nurse}
             </span>
+            {isManager && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] md:text-xs font-semibold flex items-center gap-1">
+                <span role="img" aria-label="manager">
+                  👩‍⚕️
+                </span>
+                매니저
+              </span>
+            )}
             {isNightSpecialist && (
               <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] md:text-xs font-semibold flex items-center gap-1">
                 <span role="img" aria-label="moon">
