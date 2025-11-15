@@ -1,4 +1,4 @@
 import type { NurseType } from "../types";
 
-export const NURSE_IDS: NurseType[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
+export const NURSE_IDS: NurseType[] = ["E", "F", "A", "B", "C", "D", "G", "H"];
 

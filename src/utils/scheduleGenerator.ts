@@ -236,16 +236,10 @@ export function generateSchedule(
       // E, F는 주말/공휴일에만 OFF이므로 목표 없음
     }
 
-    // E, F 간호사의 주간 패턴 (더 다양하게 - 주 단위 + 일 단위 변화)
-    // 주 단위로 기본 패턴을 정하되, 일 단위로도 약간의 변화를 줌
-    const dayOfWeek = day.getDay();
-    const baseWeekPattern = weekNumber % 2;
-    // 일요일(0)부터 시작하여 주 중간에도 패턴 변화
-    const dayVariation = Math.floor(dayOfWeek / 3); // 0-1, 0-1, 0-1로 변화
-    const eWeekShift =
-      (baseWeekPattern + dayVariation) % 2 === 0 ? "DAY" : "EVENING";
-    const fWeekShift =
-      (baseWeekPattern + dayVariation) % 2 === 0 ? "EVENING" : "DAY"; // F는 E와 반대
+    // E, F 간호사는 격주로 DAY/EVENING을 고정 패턴으로 번갈아 근무
+    const isEvenWeek = weekNumber % 2 === 0;
+    const eWeekShift = isEvenWeek ? "DAY" : "EVENING";
+    const fWeekShift = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대
 
     // 해당 날짜의 근무 배정
     const dayAssignments = new Map<ShiftType, NurseType[]>();
