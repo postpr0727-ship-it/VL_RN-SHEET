@@ -122,21 +122,39 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 py-6 md:py-10 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6 md:mb-10">
-          <p className="text-sm uppercase tracking-[0.25em] text-slate-500 mb-2">
-            Smart Staffing
-          </p>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
-            <div>
-              <h1 className="text-3xl md:text-5xl font-bold text-slate-900">
-                건강센터 간호사 근무표
-              </h1>
-              <p className="text-sm md:text-base text-slate-500 mt-2">
-                공평한 근무 분배와 손쉬운 연차 관리까지 한 번에
+          <div className="flex items-center gap-4 mb-4">
+            <img 
+              src="/logo.jpg" 
+              alt="VL LEWEST 로고" 
+              style={{ 
+                height: "60px", 
+                width: "auto",
+                objectFit: "contain",
+                display: "block"
+              }}
+              onError={(e) => {
+                console.error("로고 이미지 로드 실패:", e);
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+            <div className="flex-1">
+              <p className="text-sm uppercase tracking-[0.25em] text-slate-500 mb-2">
+                Smart Staffing
               </p>
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                <div>
+                  <h1 className="text-3xl md:text-5xl font-bold text-slate-900">
+                    건강센터 간호사 근무표
+                  </h1>
+                  <p className="text-sm md:text-base text-slate-500 mt-2">
+                    공평한 근무 분배와 손쉬운 연차 관리까지 한 번에
+                  </p>
+                </div>
+                <span className="text-sm text-slate-500">
+                  {format(new Date(year, month - 1), "yyyy.MM")}
+                </span>
+              </div>
             </div>
-            <span className="text-sm text-slate-500">
-              {format(new Date(year, month - 1), "yyyy.MM")}
-            </span>
           </div>
         </header>
 
