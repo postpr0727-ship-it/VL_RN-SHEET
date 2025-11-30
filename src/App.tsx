@@ -202,7 +202,7 @@ function App() {
               onClick={() => exportToExcel({ schedule, year, month, nurseLabels })}
               className="px-6 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors font-semibold shadow-lg shadow-green-900/10"
             >
-              📊 구글시트 내보내기
+              📊 엑셀 내보내기
             </button>
           </div>
         </div>
