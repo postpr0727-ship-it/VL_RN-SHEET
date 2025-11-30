@@ -1,4 +1,3 @@
-import ExcelJS from 'exceljs';
 import { format } from 'date-fns';
 import type { ScheduleEntry, NurseType, ShiftType } from '../types';
 import { NURSE_IDS } from '../constants/nurses';
@@ -13,6 +12,30 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
 
 const WORK_SHIFTS: ShiftType[] = ["DAY", "MID-DAY", "EVENING", "NIGHT"];
 
+// 색상 정의 (HTML RGB 형식)
+const SHIFT_COLORS: Record<ShiftType, { bg: string, text: string }> = {
+  DAY: { 
+    bg: "#DBEAFE", // 밝은 파란색 배경
+    text: "#1E40AF"  // 진한 파란색 텍스트
+  },
+  "MID-DAY": { 
+    bg: "#D1FAE5", // 밝은 초록색 배경
+    text: "#166534"  // 진한 초록색 텍스트
+  },
+  EVENING: { 
+    bg: "#FEF3C7", // 밝은 노란색 배경
+    text: "#92400E"  // 진한 노란색 텍스트
+  },
+  NIGHT: { 
+    bg: "#E9D5FF", // 밝은 보라색 배경
+    text: "#6B21A8"  // 진한 보라색 텍스트
+  },
+  OFF: { 
+    bg: "#F3F4F6", // 밝은 회색 배경
+    text: "#4B5563"  // 진한 회색 텍스트
+  },
+};
+
 interface ExportData {
   schedule: ScheduleEntry[];
   year: number;
@@ -20,101 +43,84 @@ interface ExportData {
   nurseLabels: Record<NurseType, string>;
 }
 
-export async function exportToExcel({ schedule, year, month, nurseLabels }: ExportData) {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet(`${year}년 ${month}월 근무표`);
-  
+export function exportToExcel({ schedule, year, month, nurseLabels }: ExportData) {
   const dates = getDatesInMonth(year, month);
+
+  // HTML 테이블 생성
+  let html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${year}년 ${month}월 근무표</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+    th {
+      background-color: #475569;
+      color: white;
+      font-weight: bold;
+    }
+    .nurse-name {
+      background-color: #F1F5F9;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>${year}년 ${month}월 근무표</h1>
+  <table>
+`;
 
   // === 근무표 섹션 ===
   
-  // 근무표 헤더
-  const headerRow = worksheet.addRow(['간호사', ...dates.map(date => {
+  // 헤더
+  html += '    <thead><tr><th>간호사</th>';
+  dates.forEach((date) => {
     const day = format(date, 'M/d');
     const weekday = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
-    return `${day}(${weekday})`;
-  })]);
-
-  // 헤더 스타일
-  headerRow.eachCell((cell) => {
-    cell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FF475569' }
-    };
-    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-    cell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' }
-    };
+    html += `<th>${day}(${weekday})</th>`;
   });
-
+  html += '</tr></thead>\n';
+  
   // 각 간호사의 근무 데이터
+  html += '    <tbody>\n';
   NURSE_IDS.forEach((nurse) => {
-    const row = worksheet.addRow([
-      nurseLabels[nurse]?.trim() || `${nurse} 간호사`,
-      ...dates.map(date => {
-        const entry = schedule.find(
-          (e) => e.nurse === nurse && 
-          format(e.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-        );
-        return entry ? SHIFT_LABELS[entry.shift] : '';
-      })
-    ]);
-
-    // 간호사 이름 열 스타일
-    const nameCell = row.getCell(1);
-    nameCell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFF1F5F9' }
-    };
-    nameCell.font = { bold: true };
-    nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    nameCell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' }
-    };
-
-    // 날짜 열들에 색상 적용
-    dates.forEach((date, colIndex) => {
-      const cell = row.getCell(colIndex + 2);
+    const nurseName = nurseLabels[nurse]?.trim() || `${nurse} 간호사`;
+    html += `      <tr><td class="nurse-name">${nurseName}</td>`;
+    
+    dates.forEach((date) => {
       const entry = schedule.find(
         (e) => e.nurse === nurse && 
         format(e.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
       );
-
+      
       if (entry && entry.shift) {
-        const style = getShiftStyle(entry.shift);
-        cell.fill = style.fill;
-        cell.font = style.font;
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' }
-        };
+        const colors = SHIFT_COLORS[entry.shift];
+        const label = SHIFT_LABELS[entry.shift];
+        html += `<td style="background-color: ${colors.bg}; color: ${colors.text}; font-weight: bold;">${label}</td>`;
       } else {
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = {
-          top: { style: 'thin' },
-          bottom: { style: 'thin' },
-          left: { style: 'thin' },
-          right: { style: 'thin' }
-        };
+        html += '<td></td>';
       }
     });
+    
+    html += '</tr>\n';
   });
-
-  // 빈 행 2개 추가
-  worksheet.addRow([]);
-  worksheet.addRow([]);
+  html += '    </tbody>\n';
+  html += '  </table>\n\n';
 
   // === 통계 섹션 ===
   
@@ -137,106 +143,45 @@ export async function exportToExcel({ schedule, year, month, nurseLabels }: Expo
     }
   });
 
-  // 통계 헤더
-  const summaryHeaderRow = worksheet.addRow([
-    ...Array(dates.length + 1).fill(''),
-    '간호사',
-    'DAY',
-    'MID-DAY',
-    'EVENING',
-    'NIGHT',
-    'OFF',
-    '총 근무'
-  ]);
-
-  // 통계 헤더 스타일
-  summaryHeaderRow.eachCell((cell, colNumber) => {
-    if (colNumber > dates.length + 1) {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF475569' }
-      };
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      cell.border = {
-        top: { style: 'thin' },
-        bottom: { style: 'thin' },
-        left: { style: 'thin' },
-        right: { style: 'thin' }
-      };
-    }
-  });
-
-  // 각 간호사의 통계 행
+  // 통계 테이블
+  html += '  <h2>월간 근무 통계</h2>\n';
+  html += '  <table>\n';
+  html += '    <thead><tr><th>간호사</th><th>DAY</th><th>MID-DAY</th><th>EVENING</th><th>NIGHT</th><th>OFF</th><th>총 근무</th></tr></thead>\n';
+  html += '    <tbody>\n';
+  
   NURSE_IDS.forEach((nurse) => {
     const nurseSummary = summary.get(nurse)!;
     const totalWork = WORK_SHIFTS.reduce(
       (sum, shift) => sum + nurseSummary[shift],
       0
     );
-
-    const row = worksheet.addRow([
-      ...Array(dates.length + 1).fill(''),
-      nurseLabels[nurse]?.trim() || `${nurse} 간호사`,
-      nurseSummary.DAY,
-      nurseSummary["MID-DAY"],
-      nurseSummary.EVENING,
-      nurseSummary.NIGHT,
-      nurseSummary.OFF,
-      totalWork
-    ]);
-
-    // 간호사 이름 열 스타일
-    const nameCell = row.getCell(dates.length + 2);
-    nameCell.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFF1F5F9' }
-    };
-    nameCell.font = { bold: true };
-    nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    nameCell.border = {
-      top: { style: 'thin' },
-      bottom: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' }
-    };
-
-    // 통계 데이터 셀 스타일
-    for (let col = dates.length + 3; col <= dates.length + 8; col++) {
-      const cell = row.getCell(col);
-      cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      cell.border = {
-        top: { style: 'thin' },
-        bottom: { style: 'thin' },
-        left: { style: 'thin' },
-        right: { style: 'thin' }
-      };
-    }
+    const nurseName = nurseLabels[nurse]?.trim() || `${nurse} 간호사`;
+    
+    html += `      <tr>
+        <td class="nurse-name">${nurseName}</td>
+        <td>${nurseSummary.DAY}</td>
+        <td>${nurseSummary["MID-DAY"]}</td>
+        <td>${nurseSummary.EVENING}</td>
+        <td>${nurseSummary.NIGHT}</td>
+        <td>${nurseSummary.OFF}</td>
+        <td><strong>${totalWork}</strong></td>
+      </tr>\n`;
   });
-
-  // 열 너비 설정
-  worksheet.getColumn(1).width = 15; // 간호사 이름 열
-  for (let i = 2; i <= dates.length + 1; i++) {
-    worksheet.getColumn(i).width = 8; // 날짜 열들
-  }
-  worksheet.getColumn(dates.length + 2).width = 15; // 통계 간호사 이름
-  for (let i = dates.length + 3; i <= dates.length + 8; i++) {
-    worksheet.getColumn(i).width = 10; // 통계 데이터 열들
-  }
-
-  // 파일명 생성
-  const fileName = `근무표_${year}년_${month}월_${format(new Date(), 'yyyyMMdd_HHmmss')}.xlsx`;
+  
+  html += '    </tbody>\n';
+  html += '  </table>\n';
+  html += '</body>\n</html>';
 
   // 파일 다운로드
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const fileName = `근무표_${year}년_${month}월_${format(new Date(), 'yyyyMMdd_HHmmss')}.html`;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 }
 
@@ -250,51 +195,4 @@ function getDatesInMonth(year: number, month: number): Date[] {
   }
   
   return dates;
-}
-
-function getShiftStyle(shift: ShiftType): { fill: any, font: any } {
-  const styles: Record<ShiftType, { fill: any, font: any }> = {
-    DAY: {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFDBEAFE' }
-      },
-      font: { bold: true, color: { argb: 'FF1E40AF' } }
-    },
-    "MID-DAY": {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFD1FAE5' }
-      },
-      font: { bold: true, color: { argb: 'FF166534' } }
-    },
-    EVENING: {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFFEF3C7' }
-      },
-      font: { bold: true, color: { argb: 'FF92400E' } }
-    },
-    NIGHT: {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE9D5FF' }
-      },
-      font: { bold: true, color: { argb: 'FF6B21A8' } }
-    },
-    OFF: {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFF3F4F6' }
-      },
-      font: { bold: true, color: { argb: 'FF4B5563' } }
-    }
-  };
-
-  return styles[shift];
 }
