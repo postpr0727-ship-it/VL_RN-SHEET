@@ -36,7 +36,7 @@ export default function VacationInput({
   };
 
   return (
-    <div className="relative w-full rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-5 lg:sticky lg:top-6">
+    <div className="relative w-full">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-widest text-slate-400">

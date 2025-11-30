@@ -23,6 +23,7 @@ function App() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [manualEdits, setManualEdits] = useState<Record<string, ShiftType>>({});
   const [showNurseEditor, setShowNurseEditor] = useState(false);
+  const [showVacationInput, setShowVacationInput] = useState(false);
   const [nurseLabels, setNurseLabels] = useState<Record<NurseType, string>>(
     () => {
       if (typeof window !== "undefined") {
@@ -179,6 +180,12 @@ function App() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setShowVacationInput(!showVacationInput)}
+              className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
+            >
+              연차 입력 {vacations.length > 0 && `(${vacations.length})`}
+            </button>
+            <button
               onClick={() => setShowNurseEditor(!showNurseEditor)}
               className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
             >
@@ -192,6 +199,31 @@ function App() {
             </button>
           </div>
         </div>
+
+        {showVacationInput && (
+          <div className="mb-6 rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-slate-400">
+                  휴무 관리
+                </p>
+                <h3 className="text-xl font-bold text-slate-900">연차 입력</h3>
+              </div>
+              <button
+                onClick={() => setShowVacationInput(false)}
+                className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
+              >
+                ✕
+              </button>
+            </div>
+            <VacationInput
+              vacations={vacations}
+              onAddVacation={handleAddVacation}
+              onRemoveVacation={handleRemoveVacation}
+              nurseLabels={nurseLabels}
+            />
+          </div>
+        )}
 
         {showNurseEditor && (
           <div className="mb-6 rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
@@ -229,26 +261,15 @@ function App() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 mb-6">
-          <div className="xl:col-span-1">
-            <VacationInput
-              vacations={vacations}
-              onAddVacation={handleAddVacation}
-              onRemoveVacation={handleRemoveVacation}
-              nurseLabels={nurseLabels}
-            />
-          </div>
-
-          <div className="xl:col-span-4">
-            <ScheduleTable
-              schedule={schedule}
-              year={year}
-              month={month}
-              manualEdits={manualEdits}
-              nurseLabels={nurseLabels}
-              onUpdateEntry={handleManualUpdate}
-            />
-          </div>
+        <div className="mb-6">
+          <ScheduleTable
+            schedule={schedule}
+            year={year}
+            month={month}
+            manualEdits={manualEdits}
+            nurseLabels={nurseLabels}
+            onUpdateEntry={handleManualUpdate}
+          />
         </div>
 
         <div className="mb-6">
