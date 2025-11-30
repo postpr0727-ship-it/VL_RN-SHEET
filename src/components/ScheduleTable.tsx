@@ -88,9 +88,9 @@ export default function ScheduleTable({
           index % 2 === 0 ? "bg-white" : "bg-gray-50"
         }`}
       >
-        <td className="border border-gray-300 p-0 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[35px] min-w-[35px] max-w-[35px]">
-          <div className="flex flex-col items-center gap-0 text-[8px]">
-            <span className="text-[8px] font-semibold leading-tight truncate w-full px-0.5">{label}</span>
+        <td className="border border-gray-300 py-2 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[35px] min-w-[35px] max-w-[35px]">
+          <div className="flex flex-col items-center gap-0.5 text-[8px]">
+            <span className="text-[8px] font-semibold leading-tight truncate w-full">{label}</span>
             {isManager && (
               <span className="text-[6px] text-amber-700 font-semibold" role="img" aria-label="manager">
                 👩‍⚕️
@@ -116,7 +116,7 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[9px] font-medium ${
+              className={`relative overflow-visible border border-gray-300 py-2 px-0.5 text-center text-[9px] font-medium ${
                 displayShift ? SHIFT_COLORS[displayShift] : "bg-white"
               } ${highlight ? "border-l-2 border-r-2 border-red-300" : ""} ${
                 isManual ? "ring-1 ring-slate-400" : ""
@@ -213,7 +213,7 @@ export default function ScheduleTable({
         <table className="w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
-              <th className="border border-gray-300 p-0 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[35px] min-w-[35px] max-w-[35px]">
+              <th className="border border-gray-300 py-2 px-1 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[35px] min-w-[35px] max-w-[35px]">
                 <div className="text-[8px]">간호사</div>
               </th>
               {dates.map((date) => {
@@ -221,7 +221,7 @@ export default function ScheduleTable({
                 return (
                   <th
                     key={date.toISOString()}
-                    className={`border border-gray-300 p-0 text-center font-semibold ${
+                    className={`border border-gray-300 py-2 px-0.5 text-center font-semibold ${
                       highlight ? "bg-red-50" : "bg-white"
                     }`}
                     style={{
