@@ -88,26 +88,17 @@ export default function ScheduleTable({
           index % 2 === 0 ? "bg-white" : "bg-gray-50"
         }`}
       >
-        <td className="border border-gray-300 p-1 font-bold text-center bg-gray-100 sticky left-0 z-10">
-          <div className="flex flex-col items-center gap-0.5 text-[10px]">
-            <span className="text-xs font-semibold">{label}</span>
-            <span className="text-[8px] text-slate-500 tracking-wide">
-              ID: {nurse}
-            </span>
+        <td className="border border-gray-300 p-0.5 font-bold text-center bg-gray-100 sticky left-0 z-10 min-w-[50px] max-w-[50px]">
+          <div className="flex flex-col items-center gap-0 text-[9px]">
+            <span className="text-[9px] font-semibold leading-tight">{label}</span>
             {isManager && (
-              <span className="px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[8px] font-semibold flex items-center gap-0.5">
-                <span role="img" aria-label="manager">
-                  👩‍⚕️
-                </span>
-                매니저
+              <span className="text-[6px] text-amber-700 font-semibold" role="img" aria-label="manager">
+                👩‍⚕️
               </span>
             )}
             {isNightSpecialist && (
-              <span className="px-1 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[8px] font-semibold flex items-center gap-0.5">
-                <span role="img" aria-label="moon">
-                  🌙
-                </span>
-                NIGHT 전담
+              <span className="text-[6px] text-indigo-700 font-semibold" role="img" aria-label="moon">
+                🌙
               </span>
             )}
           </div>
@@ -125,7 +116,7 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 p-0.5 text-center text-[10px] font-medium ${
+              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[8px] font-medium w-[28px] min-w-[28px] max-w-[28px] ${
                 displayShift ? SHIFT_COLORS[displayShift] : "bg-white"
               } ${highlight ? "border-l-2 border-r-2 border-red-300" : ""} ${
                 isManual ? "ring-1 ring-slate-400" : ""
@@ -215,30 +206,30 @@ export default function ScheduleTable({
   return (
     <div className="w-full overflow-x-auto bg-white rounded-lg shadow-lg">
       <div className="inline-block min-w-full">
-        <table className="w-full border-collapse text-[10px]">
+        <table className="w-full border-collapse text-[8px] table-fixed">
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
-              <th className="border border-gray-300 p-1 font-bold text-center bg-gray-200 sticky left-0 z-20 min-w-[70px]">
-                간호사
+              <th className="border border-gray-300 p-0.5 font-bold text-center bg-gray-200 sticky left-0 z-20 min-w-[50px] max-w-[50px]">
+                <div className="text-[9px]">간호사</div>
               </th>
               {dates.map((date) => {
                 const highlight = isWeekend(date) || isHolidayDate(date);
                 return (
                   <th
                     key={date.toISOString()}
-                    className={`border border-gray-300 p-0.5 text-center font-semibold min-w-[35px] ${
+                    className={`border border-gray-300 p-0 text-center font-semibold w-[28px] min-w-[28px] max-w-[28px] ${
                       highlight ? "bg-red-50" : "bg-white"
                     }`}
                   >
-                    <div className="text-[10px] font-bold">
-                      {format(date, 'M/d')}
+                    <div className="text-[8px] font-bold leading-tight">
+                      {format(date, 'd')}
                     </div>
                     <div
-                      className={`text-[8px] ${
+                      className={`text-[7px] leading-tight ${
                         highlight ? 'text-red-600 font-bold' : 'text-gray-600'
                       }`}
                     >
-                      {weekdayNames[date.getDay()]}
+                      {weekdayNames[date.getDay()].charAt(0)}
                     </div>
                   </th>
                 );
