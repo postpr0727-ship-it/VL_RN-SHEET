@@ -13,27 +13,27 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
 
 const WORK_SHIFTS: ShiftType[] = ["DAY", "MID-DAY", "EVENING", "NIGHT"];
 
-// 색상 정의
-const SHIFT_COLORS: Record<ShiftType, { fgColor: { rgb: string }, bgColor: { rgb: string } }> = {
+// 색상 정의 (RGB 형식)
+const SHIFT_COLORS: Record<ShiftType, { font: string, fill: string }> = {
   DAY: { 
-    fgColor: { rgb: "1E40AF" }, // 진한 파란색 텍스트
-    bgColor: { rgb: "DBEAFE" }  // 밝은 파란색 배경
+    font: "1E40AF", // 진한 파란색 텍스트
+    fill: "DBEAFE"  // 밝은 파란색 배경
   },
   "MID-DAY": { 
-    fgColor: { rgb: "166534" }, // 진한 초록색 텍스트
-    bgColor: { rgb: "D1FAE5" }  // 밝은 초록색 배경
+    font: "166534", // 진한 초록색 텍스트
+    fill: "D1FAE5"  // 밝은 초록색 배경
   },
   EVENING: { 
-    fgColor: { rgb: "92400E" }, // 진한 노란색 텍스트
-    bgColor: { rgb: "FEF3C7" }  // 밝은 노란색 배경
+    font: "92400E", // 진한 노란색 텍스트
+    fill: "FEF3C7"  // 밝은 노란색 배경
   },
   NIGHT: { 
-    fgColor: { rgb: "6B21A8" }, // 진한 보라색 텍스트
-    bgColor: { rgb: "E9D5FF" }  // 밝은 보라색 배경
+    font: "6B21A8", // 진한 보라색 텍스트
+    fill: "E9D5FF"  // 밝은 보라색 배경
   },
   OFF: { 
-    fgColor: { rgb: "4B5563" }, // 진한 회색 텍스트
-    bgColor: { rgb: "F3F4F6" }  // 밝은 회색 배경
+    font: "4B5563", // 진한 회색 텍스트
+    fill: "F3F4F6"  // 밝은 회색 배경
   },
 };
 
@@ -46,16 +46,16 @@ interface ExportData {
 
 export function exportToExcel({ schedule, year, month, nurseLabels }: ExportData) {
   const workbook = XLSX.utils.book_new();
+  const dates = getDatesInMonth(year, month);
 
   // 하나의 시트에 근무표와 통계 모두 포함
-  const { sheetData, range } = createCombinedSheet(schedule, year, month, nurseLabels);
+  const sheetData = createCombinedSheet(schedule, year, month, nurseLabels, dates);
   const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
   
   // 스타일 적용
-  applyStyles(worksheet, schedule, year, month, nurseLabels, range);
+  applyStyles(worksheet, schedule, dates, nurseLabels);
 
   // 열 너비 설정
-  const dates = getDatesInMonth(year, month);
   worksheet['!cols'] = [
     { wch: 15 }, // 간호사 이름 열
     ...Array(dates.length).fill({ wch: 8 }), // 날짜 열들
@@ -94,15 +94,15 @@ function createCombinedSheet(
   schedule: ScheduleEntry[],
   year: number,
   month: number,
-  nurseLabels: Record<NurseType, string>
-): { sheetData: (string | number)[][], range: { scheduleEndRow: number, scheduleEndCol: number } } {
+  nurseLabels: Record<NurseType, string>,
+  dates: Date[]
+): (string | number)[][] {
   const data: (string | number)[][] = [];
-  const dates = getDatesInMonth(year, month);
 
   // === 근무표 섹션 ===
   
   // 근무표 헤더
-  const scheduleHeader = ['간호사'];
+  const scheduleHeader: (string | number)[] = ['간호사'];
   dates.forEach((date) => {
     const day = format(date, 'M/d');
     const weekday = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
@@ -127,16 +127,18 @@ function createCombinedSheet(
     data.push(row);
   });
 
-  const scheduleEndRow = data.length - 1;
-  const scheduleEndCol = scheduleHeader.length - 1;
-
   // 빈 행 추가
   data.push([]);
 
   // === 통계 섹션 ===
   
   // 통계 헤더
-  data.push(['', '', ...Array(dates.length - 2).fill(''), '│', '간호사', 'DAY', 'MID-DAY', 'EVENING', 'NIGHT', 'OFF', '총 근무']);
+  const summaryHeader: (string | number)[] = [];
+  for (let i = 0; i < dates.length; i++) {
+    summaryHeader.push('');
+  }
+  summaryHeader.push('│', '간호사', 'DAY', 'MID-DAY', 'EVENING', 'NIGHT', 'OFF', '총 근무');
+  data.push(summaryHeader);
 
   // 통계 계산
   const summary = new Map<NurseType, Record<ShiftType, number>>();
@@ -170,7 +172,9 @@ function createCombinedSheet(
     const row: (string | number)[] = [];
     
     // 날짜 열 개수만큼 빈 셀 추가
-    row.push(...Array(dates.length).fill(''));
+    for (let i = 0; i < dates.length; i++) {
+      row.push('');
+    }
     row.push('│'); // 구분선
     row.push(nurseName);
     row.push(nurseSummary.DAY);
@@ -183,26 +187,24 @@ function createCombinedSheet(
     data.push(row);
   });
 
-  return { 
-    sheetData: data, 
-    range: { 
-      scheduleEndRow, 
-      scheduleEndCol 
-    } 
-  };
+  return data;
 }
 
 function applyStyles(
   worksheet: XLSX.WorkSheet,
   schedule: ScheduleEntry[],
-  year: number,
-  month: number,
-  nurseLabels: Record<NurseType, string>,
-  range: { scheduleEndRow: number, scheduleEndCol: number }
+  dates: Date[],
+  nurseLabels: Record<NurseType, string>
 ) {
-  const dates = getDatesInMonth(year, month);
+  if (!worksheet['!ref']) return;
   
-  // 헤더 스타일 (첫 번째 행)
+  const range = XLSX.utils.decode_range(worksheet['!ref']);
+  const scheduleEndRow = NURSE_IDS.length; // 헤더(0) + 간호사 수
+  const scheduleEndCol = dates.length; // 간호사 이름 열(0) + 날짜 열들
+  const summaryStartRow = scheduleEndRow + 2; // 빈 행 포함
+  const summaryStartCol = dates.length + 1; // 구분선 다음 열
+
+  // 헤더 스타일
   const headerStyle = {
     font: { bold: true, color: { rgb: "FFFFFF" } },
     fill: { fgColor: { rgb: "475569" } },
@@ -215,23 +217,25 @@ function applyStyles(
     }
   };
 
-  // 근무표 헤더 스타일 적용
-  for (let col = 0; col <= range.scheduleEndCol; col++) {
+  // 근무표 헤더 스타일 (첫 번째 행)
+  for (let col = 0; col <= scheduleEndCol; col++) {
     const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-    if (!worksheet[cellAddress]) continue;
+    if (!worksheet[cellAddress]) {
+      worksheet[cellAddress] = { v: '', t: 's' };
+    }
     worksheet[cellAddress].s = headerStyle;
   }
 
-  // 통계 헤더 스타일 적용 (근무표 헤더 행 + 2)
-  const summaryHeaderRow = range.scheduleEndRow + 2;
-  const summaryStartCol = range.scheduleEndCol + 2; // 구분선 다음 열
-  for (let col = summaryStartCol; col <= summaryStartCol + 6; col++) {
-    const cellAddress = XLSX.utils.encode_cell({ r: summaryHeaderRow, c: col });
-    if (!worksheet[cellAddress]) continue;
+  // 통계 헤더 스타일
+  for (let col = summaryStartCol; col < summaryStartCol + 7; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: summaryStartRow, c: col });
+    if (!worksheet[cellAddress]) {
+      worksheet[cellAddress] = { v: '', t: 's' };
+    }
     worksheet[cellAddress].s = headerStyle;
   }
 
-  // 간호사 이름 열 스타일 (고정 회색 배경)
+  // 간호사 이름 열 스타일
   const nameColumnStyle = {
     font: { bold: true },
     fill: { fgColor: { rgb: "F1F5F9" } },
@@ -244,36 +248,50 @@ function applyStyles(
     }
   };
 
-  // 근무표의 간호사 이름 열 스타일
-  for (let row = 1; row <= range.scheduleEndRow; row++) {
+  // 근무표의 간호사 이름 열
+  for (let row = 1; row <= scheduleEndRow; row++) {
     const cellAddress = XLSX.utils.encode_cell({ r: row, c: 0 });
     if (!worksheet[cellAddress]) continue;
     worksheet[cellAddress].s = nameColumnStyle;
   }
 
-  // 통계의 간호사 이름 열 스타일
-  for (let row = summaryHeaderRow + 1; row < summaryHeaderRow + 1 + NURSE_IDS.length; row++) {
+  // 통계의 간호사 이름 열
+  for (let row = summaryStartRow + 1; row < summaryStartRow + 1 + NURSE_IDS.length; row++) {
     const cellAddress = XLSX.utils.encode_cell({ r: row, c: summaryStartCol });
     if (!worksheet[cellAddress]) continue;
     worksheet[cellAddress].s = nameColumnStyle;
   }
 
   // 근무표 데이터 셀에 색상 적용
-  for (let row = 1; row <= range.scheduleEndRow; row++) {
-    for (let col = 1; col <= range.scheduleEndCol; col++) {
+  for (let row = 1; row <= scheduleEndRow; row++) {
+    const nurse = NURSE_IDS[row - 1];
+    for (let col = 1; col <= scheduleEndCol; col++) {
+      const date = dates[col - 1];
+      const entry = schedule.find(
+        (e) => e.nurse === nurse && 
+        format(e.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+      );
+
       const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      const cell = worksheet[cellAddress];
-      if (!cell || !cell.v) continue;
+      if (!worksheet[cellAddress]) {
+        worksheet[cellAddress] = { v: '', t: 's' };
+      }
 
-      const shiftValue = String(cell.v).trim();
-      const shiftType = Object.keys(SHIFT_LABELS).find(
-        key => SHIFT_LABELS[key as ShiftType] === shiftValue
-      ) as ShiftType | undefined;
-
-      if (shiftType && SHIFT_COLORS[shiftType]) {
-        cell.s = {
-          font: { bold: true, color: SHIFT_COLORS[shiftType].fgColor },
-          fill: { fgColor: SHIFT_COLORS[shiftType].bgColor },
+      if (entry && SHIFT_COLORS[entry.shift]) {
+        const colors = SHIFT_COLORS[entry.shift];
+        worksheet[cellAddress].s = {
+          font: { bold: true, color: { rgb: colors.font } },
+          fill: { fgColor: { rgb: colors.fill } },
+          alignment: { horizontal: "center", vertical: "center" as const },
+          border: {
+            top: { style: "thin" as const },
+            bottom: { style: "thin" as const },
+            left: { style: "thin" as const },
+            right: { style: "thin" as const }
+          }
+        };
+      } else {
+        worksheet[cellAddress].s = {
           alignment: { horizontal: "center", vertical: "center" as const },
           border: {
             top: { style: "thin" as const },
@@ -297,20 +315,21 @@ function applyStyles(
     }
   };
 
-  for (let row = summaryHeaderRow + 1; row < summaryHeaderRow + 1 + NURSE_IDS.length; row++) {
-    for (let col = summaryStartCol + 1; col <= summaryStartCol + 6; col++) {
+  for (let row = summaryStartRow + 1; row < summaryStartRow + 1 + NURSE_IDS.length; row++) {
+    for (let col = summaryStartCol + 1; col < summaryStartCol + 7; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
       if (!worksheet[cellAddress]) continue;
       worksheet[cellAddress].s = summaryDataStyle;
     }
   }
 
-  // 모든 셀에 기본 테두리 추가
-  const rangeObj = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-  for (let row = 0; row <= rangeObj.e.r; row++) {
-    for (let col = 0; col <= rangeObj.e.c; col++) {
+  // 나머지 빈 셀들에 기본 테두리 적용
+  for (let row = 0; row <= range.e.r; row++) {
+    for (let col = 0; col <= range.e.c; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      if (!worksheet[cellAddress]) continue;
+      if (!worksheet[cellAddress]) {
+        worksheet[cellAddress] = { v: '', t: 's' };
+      }
       if (!worksheet[cellAddress].s) {
         worksheet[cellAddress].s = {
           border: {
