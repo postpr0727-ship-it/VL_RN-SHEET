@@ -88,9 +88,9 @@ export default function ScheduleTable({
           index % 2 === 0 ? "bg-white" : "bg-gray-50"
         }`}
       >
-        <td className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[50px] min-w-[50px] max-w-[50px]">
+        <td className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[70px] min-w-[70px] max-w-[70px]">
           <div className="flex flex-col items-center gap-0.5 text-[8px]">
-            <span className="text-[8px] font-semibold leading-tight break-words">{label}</span>
+            <span className="text-[8px] font-semibold leading-tight whitespace-normal break-words">{label}</span>
             {isManager && (
               <span className="text-[6px] text-amber-700 font-semibold" role="img" aria-label="manager">
                 👩‍⚕️
@@ -122,7 +122,7 @@ export default function ScheduleTable({
                 isManual ? "ring-1 ring-slate-400" : ""
               }`}
               style={{
-                width: `calc((100% - 50px) / ${dates.length})`,
+                width: `calc((100% - 70px) / ${dates.length})`,
                 minWidth: '24px'
               }}
               onClick={() =>
@@ -213,7 +213,7 @@ export default function ScheduleTable({
         <table className="w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
-              <th className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[50px] min-w-[50px] max-w-[50px]">
+              <th className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[70px] min-w-[70px] max-w-[70px]">
                 <div className="text-[8px]">간호사</div>
               </th>
               {dates.map((date) => {
