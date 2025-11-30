@@ -4,6 +4,7 @@ import ScheduleTable from "./components/ScheduleTable";
 import ScheduleSummary from "./components/ScheduleSummary";
 import VacationInput from "./components/VacationInput";
 import { generateSchedule } from "./utils/scheduleGenerator";
+import { exportToExcel } from "./utils/excelExporter";
 import type { VacationDay, ShiftType, NurseType, ScheduleEntry } from "./types";
 
 const DEFAULT_NURSE_LABELS: Record<NurseType, string> = {
@@ -196,6 +197,12 @@ function App() {
               className="px-6 py-2 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors font-semibold shadow-lg shadow-slate-900/10"
             >
               근무표 생성
+            </button>
+            <button
+              onClick={() => exportToExcel({ schedule, year, month, nurseLabels })}
+              className="px-6 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors font-semibold shadow-lg shadow-green-900/10"
+            >
+              📊 엑셀 내보내기
             </button>
           </div>
         </div>
