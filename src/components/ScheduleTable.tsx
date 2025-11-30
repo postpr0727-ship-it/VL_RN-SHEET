@@ -116,11 +116,15 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[9px] font-medium w-[32px] min-w-[32px] max-w-[32px] ${
+              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[9px] font-medium ${
                 displayShift ? SHIFT_COLORS[displayShift] : "bg-white"
               } ${highlight ? "border-l-2 border-r-2 border-red-300" : ""} ${
                 isManual ? "ring-1 ring-slate-400" : ""
               }`}
+              style={{
+                width: `calc((100% - 35px) / ${dates.length})`,
+                minWidth: '24px'
+              }}
               onClick={() =>
                 setEditingCell({
                   nurse,
@@ -206,7 +210,7 @@ export default function ScheduleTable({
   return (
     <div className="w-full overflow-x-auto bg-white rounded-lg shadow-lg">
       <div className="inline-block min-w-full">
-        <table className="w-full border-collapse text-[8px] table-fixed">
+        <table className="w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
               <th className="border border-gray-300 p-0 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[35px] min-w-[35px] max-w-[35px]">
@@ -217,9 +221,13 @@ export default function ScheduleTable({
                 return (
                   <th
                     key={date.toISOString()}
-                    className={`border border-gray-300 p-0 text-center font-semibold w-[32px] min-w-[32px] max-w-[32px] ${
+                    className={`border border-gray-300 p-0 text-center font-semibold ${
                       highlight ? "bg-red-50" : "bg-white"
                     }`}
+                    style={{
+                      width: `calc((100% - 35px) / ${dates.length})`,
+                      minWidth: '24px'
+                    }}
                   >
                     <div className="text-[9px] font-bold leading-tight">
                       {format(date, 'd')}
