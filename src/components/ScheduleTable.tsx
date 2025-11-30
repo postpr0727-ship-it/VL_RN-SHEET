@@ -88,9 +88,9 @@ export default function ScheduleTable({
           index % 2 === 0 ? "bg-white" : "bg-gray-50"
         }`}
       >
-        <td className="border border-gray-300 p-0.5 font-bold text-center bg-gray-100 sticky left-0 z-10 min-w-[50px] max-w-[50px]">
-          <div className="flex flex-col items-center gap-0 text-[9px]">
-            <span className="text-[9px] font-semibold leading-tight">{label}</span>
+        <td className="border border-gray-300 p-0 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[35px] min-w-[35px] max-w-[35px]">
+          <div className="flex flex-col items-center gap-0 text-[8px]">
+            <span className="text-[8px] font-semibold leading-tight truncate w-full px-0.5">{label}</span>
             {isManager && (
               <span className="text-[6px] text-amber-700 font-semibold" role="img" aria-label="manager">
                 👩‍⚕️
@@ -116,7 +116,7 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[8px] font-medium w-[28px] min-w-[28px] max-w-[28px] ${
+              className={`relative overflow-visible border border-gray-300 p-0 text-center text-[9px] font-medium w-[32px] min-w-[32px] max-w-[32px] ${
                 displayShift ? SHIFT_COLORS[displayShift] : "bg-white"
               } ${highlight ? "border-l-2 border-r-2 border-red-300" : ""} ${
                 isManual ? "ring-1 ring-slate-400" : ""
@@ -209,23 +209,23 @@ export default function ScheduleTable({
         <table className="w-full border-collapse text-[8px] table-fixed">
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
-              <th className="border border-gray-300 p-0.5 font-bold text-center bg-gray-200 sticky left-0 z-20 min-w-[50px] max-w-[50px]">
-                <div className="text-[9px]">간호사</div>
+              <th className="border border-gray-300 p-0 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[35px] min-w-[35px] max-w-[35px]">
+                <div className="text-[8px]">간호사</div>
               </th>
               {dates.map((date) => {
                 const highlight = isWeekend(date) || isHolidayDate(date);
                 return (
                   <th
                     key={date.toISOString()}
-                    className={`border border-gray-300 p-0 text-center font-semibold w-[28px] min-w-[28px] max-w-[28px] ${
+                    className={`border border-gray-300 p-0 text-center font-semibold w-[32px] min-w-[32px] max-w-[32px] ${
                       highlight ? "bg-red-50" : "bg-white"
                     }`}
                   >
-                    <div className="text-[8px] font-bold leading-tight">
+                    <div className="text-[9px] font-bold leading-tight">
                       {format(date, 'd')}
                     </div>
                     <div
-                      className={`text-[7px] leading-tight ${
+                      className={`text-[8px] leading-tight ${
                         highlight ? 'text-red-600 font-bold' : 'text-gray-600'
                       }`}
                     >
