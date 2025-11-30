@@ -200,64 +200,68 @@ function App() {
           </div>
         </div>
 
-        {showVacationInput && (
-          <div className="mb-6 rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-400">
-                  휴무 관리
-                </p>
-                <h3 className="text-xl font-bold text-slate-900">연차 입력</h3>
+        {(showVacationInput || showNurseEditor) && (
+          <div className="mb-6 flex flex-wrap gap-4">
+            {showVacationInput && (
+              <div className="flex-1 min-w-[400px] rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                      휴무 관리
+                    </p>
+                    <h3 className="text-xl font-bold text-slate-900">연차 입력</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowVacationInput(false)}
+                    className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <VacationInput
+                  vacations={vacations}
+                  onAddVacation={handleAddVacation}
+                  onRemoveVacation={handleRemoveVacation}
+                  nurseLabels={nurseLabels}
+                />
               </div>
-              <button
-                onClick={() => setShowVacationInput(false)}
-                className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            <VacationInput
-              vacations={vacations}
-              onAddVacation={handleAddVacation}
-              onRemoveVacation={handleRemoveVacation}
-              nurseLabels={nurseLabels}
-            />
-          </div>
-        )}
+            )}
 
-        {showNurseEditor && (
-          <div className="mb-6 rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-slate-400">
-                  간호사 정보
-                </p>
-                <h3 className="text-xl font-bold text-slate-900">이름 설정</h3>
+            {showNurseEditor && (
+              <div className="flex-1 min-w-[400px] rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                      간호사 정보
+                    </p>
+                    <h3 className="text-xl font-bold text-slate-900">이름 설정</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowNurseEditor(false)}
+                    className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Object.keys(nurseLabels).map((nurse) => (
+                    <label
+                      key={nurse}
+                      className="flex flex-col text-xs font-semibold text-slate-500"
+                    >
+                      {nurse} 간호사
+                      <input
+                        type="text"
+                        value={nurseLabels[nurse as NurseType] ?? nurse}
+                        onChange={(e) => handleUpdateNurseLabel(nurse as NurseType, e.target.value)}
+                        placeholder={`${nurse} 간호사`}
+                        className="mt-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                      />
+                    </label>
+                  ))}
+                </div>
               </div>
-              <button
-                onClick={() => setShowNurseEditor(false)}
-                className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Object.keys(nurseLabels).map((nurse) => (
-                <label
-                  key={nurse}
-                  className="flex flex-col text-xs font-semibold text-slate-500"
-                >
-                  {nurse} 간호사
-                  <input
-                    type="text"
-                    value={nurseLabels[nurse as NurseType] ?? nurse}
-                    onChange={(e) => handleUpdateNurseLabel(nurse as NurseType, e.target.value)}
-                    placeholder={`${nurse} 간호사`}
-                    className="mt-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                  />
-                </label>
-              ))}
-            </div>
+            )}
           </div>
         )}
 
