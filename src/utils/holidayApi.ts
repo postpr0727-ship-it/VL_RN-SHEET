@@ -23,23 +23,41 @@ export async function fetchHolidaysFromAPI(year: number): Promise<Holiday[]> {
     
     if (apiKey) {
       // CORS 문제로 인해 프록시 서버가 필요할 수 있음
+      // Vercel Functions나 Netlify Functions를 통해 프록시 가능
       const url = `http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${year}&ServiceKey=${encodeURIComponent(apiKey)}&_type=json&numOfRows=100`;
       
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data.response?.body?.items?.item) {
-        const items = Array.isArray(data.response.body.items.item) 
-          ? data.response.body.items.item 
-          : [data.response.body.items.item];
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
         
-        return items.map((item: any) => ({
-          month: parseInt(item.locdate.toString().substring(4, 6)),
-          day: parseInt(item.locdate.toString().substring(6, 8)),
-          name: item.dateName,
-        }));
+        if (data.response?.body?.items?.item) {
+          const items = Array.isArray(data.response.body.items.item) 
+            ? data.response.body.items.item 
+            : [data.response.body.items.item];
+          
+          return items.map((item: any) => ({
+            month: parseInt(item.locdate.toString().substring(4, 6)),
+            day: parseInt(item.locdate.toString().substring(6, 8)),
+            name: item.dateName,
+          }));
+        }
+      } catch (corsError) {
+        // CORS 오류 시 프록시 서버를 통해 호출 시도
+        console.log("CORS 오류 발생, 프록시 서버 필요");
+        // TODO: Vercel Function 등 프록시 서버 구현 필요
       }
     }
+    
+    // 옵션 2: 무료 공휴일 API (CORS 없이 사용 가능한 경우)
+    // 참고: 실제 API 엔드포인트로 교체 필요
+    // const freeApiUrl = `https://api.example.com/holidays/kr/${year}`;
+    // try {
+    //   const response = await fetch(freeApiUrl);
+    //   const data = await response.json();
+    //   return data.holidays || [];
+    // } catch (error) {
+    //   console.error("무료 API 호출 실패:", error);
+    // }
     
     // API 키가 없거나 실패한 경우 빈 배열 반환
     return [];

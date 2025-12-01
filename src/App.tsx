@@ -8,6 +8,7 @@ import SavedSchedulesList from "./components/SavedSchedulesList";
 import { generateSchedule } from "./utils/scheduleGenerator";
 import { exportToExcel } from "./utils/excelExporter";
 import { saveSchedule } from "./utils/scheduleStorage";
+import { getHolidayDates } from "./utils/holidays";
 import type { VacationDay, ShiftType, NurseType, ScheduleEntry, SavedSchedule } from "./types";
 
 const DEFAULT_NURSE_LABELS: Record<NurseType, string> = {
@@ -124,6 +125,27 @@ function App() {
       window.localStorage.setItem("nurseLabels", JSON.stringify(nurseLabels));
     }
   }, [nurseLabels]);
+
+  // 공휴일 자동 로드 (현재 연도 및 이전/다음 연도)
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    const yearsToLoad = [currentYear - 1, currentYear, currentYear + 1];
+    
+    // 각 연도의 공휴일을 미리 로드 (백그라운드에서 API 호출 시도)
+    yearsToLoad.forEach((year) => {
+      getHolidayDates(year);
+    });
+  }, []);
+
+  // 연도가 변경될 때 공휴일 자동 로드
+  useEffect(() => {
+    // 현재 보고 있는 연도의 공휴일 로드
+    getHolidayDates(year);
+    
+    // 이전/다음 연도도 미리 로드
+    getHolidayDates(year - 1);
+    getHolidayDates(year + 1);
+  }, [year]);
 
   const handleSaveSchedule = useCallback(
     (name: string) => {
