@@ -3,9 +3,12 @@ import { format } from "date-fns";
 import ScheduleTable from "./components/ScheduleTable";
 import ScheduleSummary from "./components/ScheduleSummary";
 import VacationInput from "./components/VacationInput";
+import SaveScheduleDialog from "./components/SaveScheduleDialog";
+import SavedSchedulesList from "./components/SavedSchedulesList";
 import { generateSchedule } from "./utils/scheduleGenerator";
 import { exportToExcel } from "./utils/excelExporter";
-import type { VacationDay, ShiftType, NurseType, ScheduleEntry } from "./types";
+import { saveSchedule } from "./utils/scheduleStorage";
+import type { VacationDay, ShiftType, NurseType, ScheduleEntry, SavedSchedule } from "./types";
 
 const DEFAULT_NURSE_LABELS: Record<NurseType, string> = {
   A: "A 간호사",
@@ -25,6 +28,8 @@ function App() {
   const [manualEdits, setManualEdits] = useState<Record<string, ShiftType>>({});
   const [showNurseEditor, setShowNurseEditor] = useState(false);
   const [showVacationInput, setShowVacationInput] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [nurseLabels, setNurseLabels] = useState<Record<NurseType, string>>(
     () => {
       if (typeof window !== "undefined") {
@@ -120,6 +125,30 @@ function App() {
     }
   }, [nurseLabels]);
 
+  const handleSaveSchedule = useCallback(
+    (name: string) => {
+      saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels);
+      setShowSaveDialog(false);
+      alert("근무표가 저장되었습니다.");
+    },
+    [year, month, schedule, vacations, manualEdits, nurseLabels]
+  );
+
+  const handleLoadSchedule = useCallback(
+    (savedSchedule: SavedSchedule) => {
+      // 날짜 설정
+      setCurrentDate(new Date(savedSchedule.year, savedSchedule.month - 1, 1));
+      // 근무표 데이터 복원
+      setVacations(savedSchedule.vacations);
+      setManualEdits(savedSchedule.manualEdits);
+      setNurseLabels(savedSchedule.nurseLabels);
+      // 근무표 재생성 트리거 (날짜가 변경되면 자동으로 재생성됨)
+      setRefreshKey((prev) => prev + 1);
+      setShowLoadDialog(false);
+    },
+    []
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-stone-50 to-amber-50/20 py-8 md:py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
@@ -209,6 +238,18 @@ function App() {
               근무표 생성
             </button>
             <button
+              onClick={() => setShowSaveDialog(true)}
+              className="px-5 py-2.5 rounded-full bg-blue-50 text-blue-900 hover:bg-blue-100 transition-all duration-300 text-sm font-light border border-blue-200/50 hover:border-blue-300"
+            >
+              💾 저장
+            </button>
+            <button
+              onClick={() => setShowLoadDialog(true)}
+              className="px-5 py-2.5 rounded-full bg-blue-50 text-blue-900 hover:bg-blue-100 transition-all duration-300 text-sm font-light border border-blue-200/50 hover:border-blue-300"
+            >
+              📂 불러오기
+            </button>
+            <button
               onClick={() => exportToExcel({ schedule, year, month, nurseLabels })}
               className="px-7 py-2.5 rounded-full bg-amber-800 text-white hover:bg-amber-900 transition-all duration-300 font-light text-sm shadow-md shadow-amber-900/20 hover:shadow-lg"
             >
@@ -216,6 +257,26 @@ function App() {
             </button>
           </div>
         </div>
+
+        {showSaveDialog && (
+          <div className="mb-8">
+            <SaveScheduleDialog
+              year={year}
+              month={month}
+              onSave={handleSaveSchedule}
+              onClose={() => setShowSaveDialog(false)}
+            />
+          </div>
+        )}
+
+        {showLoadDialog && (
+          <div className="mb-8">
+            <SavedSchedulesList
+              onLoad={handleLoadSchedule}
+              onClose={() => setShowLoadDialog(false)}
+            />
+          </div>
+        )}
 
         {(showVacationInput || showNurseEditor) && (
           <div className="mb-8 flex flex-wrap gap-6">
