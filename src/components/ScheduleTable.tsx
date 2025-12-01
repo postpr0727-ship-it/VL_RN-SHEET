@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format, isSameDay, isWeekend } from "date-fns";
 import type { NurseType, ScheduleEntry, ShiftType } from "../types";
 import { NURSE_IDS } from "../constants/nurses";
-import { isHoliday } from "../utils/holidays";
+import { isHoliday, getHolidayName } from "../utils/holidays";
 
 interface ScheduleTableProps {
   schedule: ScheduleEntry[];
@@ -205,6 +205,7 @@ export default function ScheduleTable({
               </th>
               {dates.map((date) => {
                 const highlight = isWeekend(date) || isHoliday(date);
+                const holidayName = getHolidayName(date);
                 return (
                   <th
                     key={date.toISOString()}
@@ -226,6 +227,11 @@ export default function ScheduleTable({
                     >
                       {weekdayNames[date.getDay()].charAt(0)}
                     </div>
+                    {holidayName && (
+                      <div className="text-[7px] text-amber-700 font-medium leading-tight mt-0.5 truncate">
+                        {holidayName}
+                      </div>
+                    )}
                   </th>
                 );
               })}
