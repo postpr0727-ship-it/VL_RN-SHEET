@@ -140,7 +140,7 @@ function App() {
               }}
             />
             <div className="flex-1">
-              <p className="text-xs uppercase tracking-[0.3em] text-amber-900/60 mb-3 font-medium">
+              <p className="text-xs uppercase tracking-[0.3em] text-amber-900/90 mb-3 font-medium">
                 Healthcare Service
               </p>
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -151,12 +151,12 @@ function App() {
                   <h2 className="text-2xl md:text-3xl font-light text-stone-700 mb-3">
                     간호사 근무표
                   </h2>
-                  <p className="text-sm md:text-base text-stone-600/80 font-light leading-relaxed max-w-xl">
+                  <p className="text-sm md:text-base text-stone-700 font-normal leading-relaxed max-w-xl">
                     24시간 상주하는 전담 간호사의 응급 케어와<br />
                     개인별 맞춤형 건강관리 서비스를 제공합니다
                   </p>
                 </div>
-                <span className="text-sm text-stone-500/80 font-light">
+                <span className="text-sm text-stone-700 font-normal">
                   {format(new Date(year, month - 1), "yyyy년 MM월")}
                 </span>
               </div>
@@ -217,7 +217,7 @@ function App() {
               <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
                 <div className="flex items-start justify-between gap-3 mb-6">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-2 font-light">
+                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
                       휴무 관리
                     </p>
                     <h3 className="text-2xl font-light text-stone-900">연차 입력</h3>
@@ -242,7 +242,7 @@ function App() {
               <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
                 <div className="flex items-start justify-between gap-3 mb-6">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-2 font-light">
+                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
                       간호사 정보
                     </p>
                     <h3 className="text-2xl font-light text-stone-900">이름 설정</h3>
@@ -258,7 +258,7 @@ function App() {
                   {Object.keys(nurseLabels).map((nurse) => (
                     <label
                       key={nurse}
-                      className="flex flex-col text-xs font-light text-stone-600"
+                      className="flex flex-col text-xs font-medium text-stone-700"
                     >
                       {nurse} 간호사
                       <input
@@ -291,14 +291,14 @@ function App() {
           <ScheduleSummary schedule={schedule} nurseLabels={nurseLabels} />
         </div>
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-stone-900/5 border border-amber-100/50 p-6 md:p-8">
-          <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-3 font-light">
+          <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-3 font-medium">
             Healthcare Service
           </p>
           <h3 className="text-2xl font-light text-stone-900 mb-6">근무 시간 안내</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm md:text-base">
             <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
               <div className="font-light text-stone-900 mb-1 text-base">DAY</div>
-              <div className="text-stone-600 text-sm">07:00 - 16:00</div>
+              <div className="text-stone-700 text-sm font-medium">07:00 - 16:00</div>
             </div>
             <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
               <div className="font-light text-stone-900 mb-1 text-base">MID-DAY</div>

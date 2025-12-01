@@ -32,12 +32,12 @@ export default function ScheduleSummary({
 
   return (
     <div className="w-full bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-stone-900/5 border border-amber-100/50 p-6 md:p-8">
-      <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-3 font-light">
+      <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-3 font-medium">
         Monthly Statistics
       </p>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-light text-stone-900">월간 근무 통계</h3>
-        <span className="text-sm text-stone-500/80 font-light">근무 종류별 횟수</span>
+        <h3 className="text-2xl font-normal text-stone-900">월간 근무 통계</h3>
+        <span className="text-sm text-stone-700 font-medium">근무 종류별 횟수</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {NURSE_IDS.map((nurse) => {
@@ -54,13 +54,13 @@ export default function ScheduleSummary({
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-stone-500/80 font-light uppercase tracking-wider">간호사</p>
+                  <p className="text-xs text-stone-700 font-medium uppercase tracking-wider">간호사</p>
                   <p className="text-xl font-light text-stone-900 mt-1">
                     {nurseLabels[nurse]?.trim() || nurse}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-stone-500/80 font-light">총 근무</p>
+                  <p className="text-xs text-stone-700 font-medium">총 근무</p>
                   <p className="text-lg font-light text-stone-900 mt-1">
                     {totalWork}
                   </p>
@@ -76,9 +76,9 @@ export default function ScheduleSummary({
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-between text-sm text-stone-500/80 pt-2 border-t border-amber-100/50">
-                <span className="font-light">OFF</span>
-                <span className="font-light text-stone-700">{totalOff}</span>
+              <div className="flex items-center justify-between text-sm text-stone-700 pt-2 border-t border-amber-100/50">
+                <span className="font-medium">OFF</span>
+                <span className="font-medium text-stone-900">{totalOff}</span>
               </div>
             </div>
           );
