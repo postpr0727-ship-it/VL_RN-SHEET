@@ -84,7 +84,8 @@ export default function ScheduleTable({
     return (
       <tr
         key={nurse}
-        className={`border-b border-gray-300 hover:bg-gray-50 bg-white`}
+        className={`border-b border-gray-300`}
+        style={{ backgroundColor: 'white' }}
       >
         <td className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[70px] min-w-[70px] max-w-[70px]">
           <div className="flex flex-col items-center gap-0.5 text-[8px]">
@@ -124,7 +125,7 @@ export default function ScheduleTable({
                 minWidth: '24px',
                 backgroundColor: '#ffffff',
                 color: '#1f2937'
-              } as React.CSSProperties}
+              }}
               onClick={() =>
                 setEditingCell({
                   nurse,
@@ -209,8 +210,14 @@ export default function ScheduleTable({
 
   return (
     <div className="w-full overflow-x-auto bg-white rounded-lg shadow-lg">
+      <style>{`
+        table.schedule-table tbody td {
+          background-color: #ffffff !important;
+          color: #1f2937 !important;
+        }
+      `}</style>
       <div className="inline-block min-w-full">
-        <table className="w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
+        <table className="schedule-table w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-400">
               <th className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[70px] min-w-[70px] max-w-[70px]">
