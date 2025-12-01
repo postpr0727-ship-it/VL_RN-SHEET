@@ -150,7 +150,7 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-stone-50 to-amber-50/20 py-8 md:py-12 px-4 md:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-100/50 via-stone-100 to-amber-100/40 py-8 md:py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8 md:mb-12">
           <div className="flex items-center gap-6 mb-6">
