@@ -18,6 +18,14 @@ interface CalendarProps {
 
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 
+const SHIFT_LABELS: Record<ShiftType, string> = {
+  DAY: "D",
+  "MID-DAY": "MID",
+  EVENING: "E",
+  NIGHT: "N",
+  OFF: "OFF",
+};
+
 const SHIFT_COLORS: Record<ShiftType, string> = {
   DAY: "bg-blue-100 text-blue-800 border-blue-300",
   "MID-DAY": "bg-green-100 text-green-800 border-green-300",
@@ -88,7 +96,7 @@ export default function Calendar({
                     key={idx}
                     className={`text-[8px] md:text-xs px-1 py-0.5 rounded border ${SHIFT_COLORS[entry.shift]}`}
                   >
-                    {entry.nurse}: {entry.shift}
+                    {entry.nurse}: {SHIFT_LABELS[entry.shift]}
                   </div>
                 ))}
                 {daySchedule.length > 3 && (

@@ -3,10 +3,10 @@ import type { ScheduleEntry, NurseType, ShiftType } from '../types';
 import { NURSE_IDS } from '../constants/nurses';
 
 const SHIFT_LABELS: Record<ShiftType, string> = {
-  DAY: "DAY",
+  DAY: "D",
   "MID-DAY": "MID",
-  EVENING: "EVE",
-  NIGHT: "NIGHT",
+  EVENING: "E",
+  NIGHT: "N",
   OFF: "OFF",
 };
 
