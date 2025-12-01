@@ -170,7 +170,10 @@ export function generateSchedule(
     }
 
     // E, F 간호사는 격주로 DAY/EVENING을 고정 패턴으로 번갈아 근무
-    const isEvenWeek = weekNumber % 2 === 0;
+    // 12월에는 E가 EVENING으로 시작하도록 조정
+    const monthOffset = month === 12 ? 1 : 0; // 12월이면 오프셋 1 추가
+    const adjustedWeekNumber = weekNumber + monthOffset;
+    const isEvenWeek = adjustedWeekNumber % 2 === 0;
     const eWeekShift = isEvenWeek ? "DAY" : "EVENING";
     const fWeekShift = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대
 
