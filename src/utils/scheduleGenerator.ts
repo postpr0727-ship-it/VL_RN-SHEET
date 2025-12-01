@@ -3,8 +3,6 @@ import {
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isWeekend,
-  isSameDay,
 } from "date-fns";
 import type {
   ShiftType,
@@ -12,72 +10,7 @@ import type {
   ScheduleEntry,
   VacationDay,
 } from "../types";
-
-// 한국 공휴일 (2024-2025 최신 반영)
-const HOLIDAY_DEFINITIONS: Record<
-  number,
-  Array<{ month: number; day: number }>
-> = {
-  2024: [
-    { month: 1, day: 1 }, // 신정
-    { month: 2, day: 9 }, // 설 연휴
-    { month: 2, day: 10 },
-    { month: 2, day: 11 },
-    { month: 2, day: 12 },
-    { month: 3, day: 1 }, // 삼일절
-    { month: 4, day: 10 }, // 제22대 국회의원 선거
-    { month: 5, day: 5 }, // 어린이날
-    { month: 5, day: 6 }, // 어린이날 대체
-    { month: 5, day: 15 }, // 부처님오신날
-    { month: 6, day: 6 }, // 현충일
-    { month: 8, day: 15 }, // 광복절
-    { month: 9, day: 16 }, // 추석 연휴
-    { month: 9, day: 17 },
-    { month: 9, day: 18 },
-    { month: 10, day: 3 }, // 개천절
-    { month: 10, day: 9 }, // 한글날
-    { month: 12, day: 25 }, // 크리스마스
-  ],
-  2025: [
-    { month: 1, day: 1 }, // 신정
-    { month: 1, day: 28 }, // 설 연휴
-    { month: 1, day: 29 },
-    { month: 1, day: 30 },
-    { month: 3, day: 1 }, // 삼일절
-    { month: 5, day: 5 }, // 어린이날 & 부처님오신날
-    { month: 5, day: 6 }, // 대체공휴일
-    { month: 6, day: 6 }, // 현충일
-    { month: 8, day: 15 }, // 광복절
-    { month: 10, day: 3 }, // 개천절
-    { month: 10, day: 5 }, // 추석 연휴
-    { month: 10, day: 6 },
-    { month: 10, day: 7 },
-    { month: 10, day: 9 }, // 한글날
-    { month: 12, day: 25 }, // 크리스마스
-  ],
-};
-
-const holidayCache = new Map<number, Date[]>();
-
-function getHolidayDates(year: number): Date[] {
-  if (!holidayCache.has(year)) {
-    const defs = HOLIDAY_DEFINITIONS[year] ?? [];
-    holidayCache.set(
-      year,
-      defs.map(({ month, day }) => new Date(year, month - 1, day)),
-    );
-  }
-  return holidayCache.get(year)!;
-}
-
-function isHoliday(date: Date): boolean {
-  const holidays = getHolidayDates(date.getFullYear());
-  return holidays.some((holiday) => isSameDay(holiday, date));
-}
-
-function isWeekendOrHoliday(date: Date): boolean {
-  return isWeekend(date) || isHoliday(date);
-}
+import { isWeekendOrHoliday } from "./holidays";
 
 // 평일 근무 인원 요구사항
 const WEEKDAY_REQUIREMENTS: Record<ShiftType, number> = {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { format, isSameDay, isWeekend } from "date-fns";
 import type { NurseType, ScheduleEntry, ShiftType } from "../types";
 import { NURSE_IDS } from "../constants/nurses";
+import { isHoliday } from "../utils/holidays";
 
 interface ScheduleTableProps {
   schedule: ScheduleEntry[];
@@ -21,24 +22,6 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
   OFF: "OFF",
 };
 const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
-
-function isHolidayDate(date: Date) {
-  const holidays = [
-    new Date(date.getFullYear(), 0, 1),
-    new Date(date.getFullYear(), 2, 1),
-    new Date(date.getFullYear(), 4, 5),
-    new Date(date.getFullYear(), 4, 15),
-    new Date(date.getFullYear(), 5, 6),
-    new Date(date.getFullYear(), 7, 15),
-    new Date(date.getFullYear(), 9, 3),
-    new Date(date.getFullYear(), 9, 9),
-    new Date(date.getFullYear(), 11, 25),
-  ]
-
-  return holidays.some(
-    h => h.getMonth() === date.getMonth() && h.getDate() === date.getDate()
-  )
-}
 
 export default function ScheduleTable({
   schedule,
@@ -96,7 +79,7 @@ export default function ScheduleTable({
         </td>
         {dates.map((date) => {
           const shift = getNurseSchedule(nurse, date);
-          const highlight = isWeekend(date) || isHolidayDate(date);
+          const highlight = isWeekend(date) || isHoliday(date);
           const dateKey = format(date, "yyyy-MM-dd");
           const cellKey = `${nurse}-${dateKey}`;
           const displayShift = manualEdits[cellKey] ?? shift;
@@ -221,7 +204,7 @@ export default function ScheduleTable({
                 <div className="text-[10px] text-stone-900 font-semibold">간호사</div>
               </th>
               {dates.map((date) => {
-                const highlight = isWeekend(date) || isHolidayDate(date);
+                const highlight = isWeekend(date) || isHoliday(date);
                 return (
                   <th
                     key={date.toISOString()}

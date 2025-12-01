@@ -7,6 +7,7 @@ import {
   isSameDay,
 } from "date-fns";
 import type { ScheduleEntry, ShiftType } from "../types";
+import { isHoliday, getHolidayName } from "../utils/holidays";
 
 interface CalendarProps {
   year: number;
@@ -75,6 +76,9 @@ export default function Calendar({
           const daySchedule = getScheduleForDate(day);
           const isSelected = selectedDate && isSameDay(day, selectedDate);
           const isToday = isSameDay(day, new Date());
+          const holidayName = getHolidayName(day);
+          const isHolidayDay = isHoliday(day);
+          const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
           return (
             <div
@@ -84,11 +88,21 @@ export default function Calendar({
                 aspect-square border rounded-lg p-1 md:p-2 cursor-pointer
                 transition-all hover:shadow-md
                 ${isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
-                ${isToday ? "bg-blue-50" : "bg-white"}
+                ${isToday ? "bg-blue-50" : ""}
+                ${isHolidayDay ? "bg-amber-50 border-amber-300" : ""}
+                ${isWeekend && !isHolidayDay ? "bg-stone-50" : ""}
+                ${!isToday && !isHolidayDay && !isWeekend ? "bg-white" : ""}
               `}
             >
-              <div className="text-xs md:text-sm font-semibold mb-1">
-                {format(day, "d")}
+              <div className="flex items-center justify-between mb-1">
+                <div className={`text-xs md:text-sm font-semibold ${isHolidayDay ? "text-amber-800" : ""}`}>
+                  {format(day, "d")}
+                </div>
+                {holidayName && (
+                  <div className="text-[8px] text-amber-700 font-medium truncate max-w-[60px]">
+                    {holidayName}
+                  </div>
+                )}
               </div>
               <div className="space-y-0.5 overflow-hidden">
                 {daySchedule.slice(0, 3).map((entry, idx) => (
