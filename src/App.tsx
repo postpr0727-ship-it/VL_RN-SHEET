@@ -126,7 +126,7 @@ function App() {
         <header className="mb-8 md:mb-12">
           <div className="flex items-center gap-6 mb-6">
             <img 
-              src="/logo.jpg" 
+              src="/vl-logo.png" 
               alt="VL 레지던스 로고" 
               style={{ 
                 height: "70px", 
@@ -135,8 +135,14 @@ function App() {
                 display: "block"
               }}
               onError={(e) => {
-                console.error("로고 이미지 로드 실패:", e);
-                (e.target as HTMLImageElement).style.display = "none";
+                // fallback to svg if png fails
+                const target = e.target as HTMLImageElement;
+                if (target.src.endsWith('.png')) {
+                  target.src = '/vl-logo.svg';
+                } else {
+                  console.error("로고 이미지 로드 실패:", e);
+                  target.style.display = "none";
+                }
               }}
             />
             <div className="flex-1">
