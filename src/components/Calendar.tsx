@@ -20,7 +20,7 @@ const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 
 const SHIFT_LABELS: Record<ShiftType, string> = {
   DAY: "D",
-  "MID-DAY": "MID",
+  "MID-DAY": "M",
   EVENING: "E",
   NIGHT: "N",
   OFF: "OFF",

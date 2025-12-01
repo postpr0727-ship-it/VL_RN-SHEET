@@ -15,7 +15,7 @@ interface ScheduleTableProps {
 const SHIFT_OPTIONS: ShiftType[] = ["DAY", "MID-DAY", "EVENING", "NIGHT", "OFF"];
 const SHIFT_LABELS: Record<ShiftType, string> = {
   DAY: "D",
-  "MID-DAY": "MID",
+  "MID-DAY": "M",
   EVENING: "E",
   NIGHT: "N",
   OFF: "OFF",

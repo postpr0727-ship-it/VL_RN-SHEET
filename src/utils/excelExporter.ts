@@ -4,7 +4,7 @@ import { NURSE_IDS } from '../constants/nurses';
 
 const SHIFT_LABELS: Record<ShiftType, string> = {
   DAY: "D",
-  "MID-DAY": "MID",
+  "MID-DAY": "M",
   EVENING: "E",
   NIGHT: "N",
   OFF: "OFF",
