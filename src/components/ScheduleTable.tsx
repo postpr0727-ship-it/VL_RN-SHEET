@@ -114,14 +114,15 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 py-3 px-0.5 text-center text-[9px] font-medium ${
-                displayShift ? SHIFT_COLORS[displayShift] : "bg-white"
-              } ${highlight ? "border-l-2 border-r-2 border-red-300" : ""} ${
+              className={`relative overflow-visible border border-gray-300 py-3 px-0.5 text-center text-[9px] font-medium bg-white text-gray-800 ${
+                highlight ? "border-l-2 border-r-2 border-red-300" : ""
+              } ${
                 isManual ? "ring-1 ring-slate-400" : ""
               }`}
               style={{
                 width: `calc((100% - 70px) / ${dates.length})`,
-                minWidth: '24px'
+                minWidth: '24px',
+                backgroundColor: 'white'
               }}
               onClick={() =>
                 setEditingCell({
