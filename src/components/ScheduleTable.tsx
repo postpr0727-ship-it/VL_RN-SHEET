@@ -76,7 +76,7 @@ export default function ScheduleTable({
     dates.push(new Date(d));
   }
 
-  const renderRow = (nurse: NurseType, index: number) => {
+  const renderRow = (nurse: NurseType) => {
     const isNightSpecialist = nurse === "G" || nurse === "H";
     const isManager = nurse === "E" || nurse === "F";
     const label = nurseLabels[nurse]?.trim() || nurse;
@@ -257,7 +257,7 @@ export default function ScheduleTable({
             </tr>
           </thead>
           <tbody>
-            {NURSE_IDS.map((nurse, index) => renderRow(nurse, index))}
+            {NURSE_IDS.map((nurse) => renderRow(nurse))}
           </tbody>
         </table>
       </div>

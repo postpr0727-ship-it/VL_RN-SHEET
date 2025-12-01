@@ -1,13 +1,6 @@
 import type { ScheduleEntry, NurseType, ShiftType } from "../types";
 import { NURSE_IDS } from "../constants/nurses";
 const WORK_SHIFTS: ShiftType[] = ["DAY", "MID-DAY", "EVENING", "NIGHT"];
-const SHIFT_COLORS: Record<ShiftType, string> = {
-  DAY: "bg-blue-50 text-blue-700 border-blue-200",
-  "MID-DAY": "bg-green-50 text-green-700 border-green-200",
-  EVENING: "bg-amber-50 text-amber-700 border-amber-200",
-  NIGHT: "bg-purple-50 text-purple-700 border-purple-200",
-  OFF: "bg-gray-100 text-gray-600 border-gray-200",
-};
 
 interface ScheduleSummaryProps {
   schedule: ScheduleEntry[];
