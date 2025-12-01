@@ -20,14 +20,6 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
   NIGHT: "N",
   OFF: "OFF",
 };
-const SHIFT_COLORS: Record<ShiftType, string> = {
-  DAY: "bg-white text-gray-800 border-gray-300",
-  "MID-DAY": "bg-white text-gray-800 border-gray-300",
-  EVENING: "bg-white text-gray-800 border-gray-300",
-  NIGHT: "bg-white text-gray-800 border-gray-300",
-  OFF: "bg-white text-gray-800 border-gray-300",
-};
-
 const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
 function isHolidayDate(date: Date) {
@@ -260,18 +252,6 @@ export default function ScheduleTable({
             {NURSE_IDS.map((nurse) => renderRow(nurse))}
           </tbody>
         </table>
-      </div>
-
-      <div className="p-5 border-t border-amber-100/50 bg-stone-50/30 rounded-b-3xl">
-        <div className="flex flex-wrap items-center gap-4 text-[11px]">
-          <span className="font-medium text-stone-800 uppercase tracking-wider">범례:</span>
-          {SHIFT_OPTIONS.map((option) => (
-            <div key={option} className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded border-2 border-stone-200 ${SHIFT_COLORS[option]}`} />
-              <span className="text-stone-800 font-medium">{SHIFT_LABELS[option]}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
