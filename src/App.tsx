@@ -121,15 +121,15 @@ function App() {
   }, [nurseLabels]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 py-6 md:py-10 px-4 md:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50/30 via-stone-50 to-amber-50/20 py-8 md:py-12 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-6 md:mb-10">
-          <div className="flex items-center gap-4 mb-4">
+        <header className="mb-8 md:mb-12">
+          <div className="flex items-center gap-6 mb-6">
             <img 
               src="/logo.jpg" 
-              alt="VL LEWEST 로고" 
+              alt="VL 레지던스 로고" 
               style={{ 
-                height: "60px", 
+                height: "70px", 
                 width: "auto",
                 objectFit: "contain",
                 display: "block"
@@ -140,67 +140,71 @@ function App() {
               }}
             />
             <div className="flex-1">
-              <p className="text-sm uppercase tracking-[0.25em] text-slate-500 mb-2">
-                Smart Staffing
+              <p className="text-xs uppercase tracking-[0.3em] text-amber-900/60 mb-3 font-medium">
+                Healthcare Service
               </p>
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl md:text-5xl font-bold text-slate-900">
-                    건강센터 간호사 근무표
+                  <h1 className="text-4xl md:text-6xl font-light text-stone-900 mb-2 tracking-tight">
+                    건강관리센터
                   </h1>
-                  <p className="text-sm md:text-base text-slate-500 mt-2">
-                    공평한 근무 분배와 손쉬운 연차 관리까지 한 번에
+                  <h2 className="text-2xl md:text-3xl font-light text-stone-700 mb-3">
+                    간호사 근무표
+                  </h2>
+                  <p className="text-sm md:text-base text-stone-600/80 font-light leading-relaxed max-w-xl">
+                    24시간 상주하는 전담 간호사의 응급 케어와<br />
+                    개인별 맞춤형 건강관리 서비스를 제공합니다
                   </p>
                 </div>
-                <span className="text-sm text-slate-500">
-                  {format(new Date(year, month - 1), "yyyy.MM")}
+                <span className="text-sm text-stone-500/80 font-light">
+                  {format(new Date(year, month - 1), "yyyy년 MM월")}
                 </span>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 backdrop-blur rounded-2xl px-4 md:px-6 py-3 shadow-sm border border-white/60">
+        <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-6 bg-white/90 backdrop-blur-sm rounded-3xl px-6 md:px-8 py-5 shadow-lg shadow-stone-900/5 border border-amber-100/50">
           <div className="flex items-center gap-4 flex-wrap">
             <button
               onClick={handlePrevMonth}
-              className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
+              className="px-5 py-2.5 rounded-full bg-stone-50 text-stone-700 hover:bg-stone-100 transition-all duration-300 text-sm font-light border border-stone-200/50 hover:border-stone-300"
             >
-              이전 달
+              ← 이전 달
             </button>
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+            <h2 className="text-2xl md:text-3xl font-light text-stone-900">
               {year}년 {month}월
             </h2>
             <button
               onClick={handleNextMonth}
-              className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
+              className="px-5 py-2.5 rounded-full bg-stone-50 text-stone-700 hover:bg-stone-100 transition-all duration-300 text-sm font-light border border-stone-200/50 hover:border-stone-300"
             >
-              다음 달
+              다음 달 →
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setShowVacationInput(!showVacationInput)}
-              className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
+              className="px-5 py-2.5 rounded-full bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all duration-300 text-sm font-light border border-amber-200/50 hover:border-amber-300"
             >
               연차 입력 {vacations.length > 0 && `(${vacations.length})`}
             </button>
             <button
               onClick={() => setShowNurseEditor(!showNurseEditor)}
-              className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-sm font-medium"
+              className="px-5 py-2.5 rounded-full bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all duration-300 text-sm font-light border border-amber-200/50 hover:border-amber-300"
             >
               간호사 이름 설정
             </button>
             <button
               onClick={handleGenerateSchedule}
-              className="px-6 py-2 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors font-semibold shadow-lg shadow-slate-900/10"
+              className="px-7 py-2.5 rounded-full bg-stone-900 text-white hover:bg-stone-800 transition-all duration-300 font-light text-sm shadow-md shadow-stone-900/20 hover:shadow-lg"
             >
               근무표 생성
             </button>
             <button
               onClick={() => exportToExcel({ schedule, year, month, nurseLabels })}
-              className="px-6 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors font-semibold shadow-lg shadow-green-900/10"
+              className="px-7 py-2.5 rounded-full bg-amber-800 text-white hover:bg-amber-900 transition-all duration-300 font-light text-sm shadow-md shadow-amber-900/20 hover:shadow-lg"
             >
               📊 구글시트 내보내기
             </button>
@@ -208,19 +212,19 @@ function App() {
         </div>
 
         {(showVacationInput || showNurseEditor) && (
-          <div className="mb-6 flex flex-wrap gap-4">
+          <div className="mb-8 flex flex-wrap gap-6">
             {showVacationInput && (
-              <div className="flex-1 min-w-[400px] rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
-                <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
+                <div className="flex items-start justify-between gap-3 mb-6">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-2 font-light">
                       휴무 관리
                     </p>
-                    <h3 className="text-xl font-bold text-slate-900">연차 입력</h3>
+                    <h3 className="text-2xl font-light text-stone-900">연차 입력</h3>
                   </div>
                   <button
                     onClick={() => setShowVacationInput(false)}
-                    className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
+                    className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
                   >
                     ✕
                   </button>
@@ -235,26 +239,26 @@ function App() {
             )}
 
             {showNurseEditor && (
-              <div className="flex-1 min-w-[400px] rounded-2xl border border-white/60 bg-white/80 backdrop-blur shadow-lg shadow-slate-900/5 p-4">
-                <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
+                <div className="flex items-start justify-between gap-3 mb-6">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-slate-400">
+                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-2 font-light">
                       간호사 정보
                     </p>
-                    <h3 className="text-xl font-bold text-slate-900">이름 설정</h3>
+                    <h3 className="text-2xl font-light text-stone-900">이름 설정</h3>
                   </div>
                   <button
                     onClick={() => setShowNurseEditor(false)}
-                    className="text-slate-400 hover:text-slate-700 transition-colors text-xl"
+                    className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
                   >
                     ✕
                   </button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {Object.keys(nurseLabels).map((nurse) => (
                     <label
                       key={nurse}
-                      className="flex flex-col text-xs font-semibold text-slate-500"
+                      className="flex flex-col text-xs font-light text-stone-600"
                     >
                       {nurse} 간호사
                       <input
@@ -262,7 +266,7 @@ function App() {
                         value={nurseLabels[nurse as NurseType] ?? nurse}
                         onChange={(e) => handleUpdateNurseLabel(nurse as NurseType, e.target.value)}
                         placeholder={`${nurse} 간호사`}
-                        className="mt-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        className="mt-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-light text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-300"
                       />
                     </label>
                   ))}
@@ -286,24 +290,27 @@ function App() {
         <div className="mb-6">
           <ScheduleSummary schedule={schedule} nurseLabels={nurseLabels} />
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-4 md:p-6">
-          <h3 className="text-lg md:text-xl font-bold mb-4">근무 시간 안내</h3>
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-stone-900/5 border border-amber-100/50 p-6 md:p-8">
+          <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-3 font-light">
+            Healthcare Service
+          </p>
+          <h3 className="text-2xl font-light text-stone-900 mb-6">근무 시간 안내</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm md:text-base">
-            <div className="p-3 bg-blue-50 rounded-md">
-              <div className="font-semibold text-blue-800">DAY</div>
-              <div className="text-blue-600">07:00 - 16:00</div>
+            <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+              <div className="font-light text-stone-900 mb-1 text-base">DAY</div>
+              <div className="text-stone-600 text-sm">07:00 - 16:00</div>
             </div>
-            <div className="p-3 bg-green-50 rounded-md">
-              <div className="font-semibold text-green-800">MID-DAY</div>
-              <div className="text-green-600">09:00 - 18:00</div>
+            <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+              <div className="font-light text-stone-900 mb-1 text-base">MID-DAY</div>
+              <div className="text-stone-600 text-sm">09:00 - 18:00</div>
             </div>
-            <div className="p-3 bg-yellow-50 rounded-md">
-              <div className="font-semibold text-yellow-800">EVENING</div>
-              <div className="text-yellow-600">12:00 - 21:00</div>
+            <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+              <div className="font-light text-stone-900 mb-1 text-base">EVENING</div>
+              <div className="text-stone-600 text-sm">12:00 - 21:00</div>
             </div>
-            <div className="p-3 bg-purple-50 rounded-md">
-              <div className="font-semibold text-purple-800">NIGHT</div>
-              <div className="text-purple-600">21:00 - 07:00</div>
+            <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+              <div className="font-light text-stone-900 mb-1 text-base">NIGHT</div>
+              <div className="text-stone-600 text-sm">21:00 - 07:00</div>
             </div>
           </div>
         </div>

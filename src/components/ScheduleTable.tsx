@@ -87,16 +87,16 @@ export default function ScheduleTable({
         className={`border-b border-gray-300`}
         style={{ backgroundColor: 'white' }}
       >
-        <td className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[70px] min-w-[70px] max-w-[70px]">
-          <div className="flex flex-col items-center gap-0.5 text-[8px]">
-            <span className="text-[8px] font-semibold leading-tight whitespace-normal break-words">{label}</span>
+        <td className="border border-stone-200/50 py-4 px-2 font-light text-center bg-stone-50/50 sticky left-0 z-10 w-[80px] min-w-[80px] max-w-[80px]">
+          <div className="flex flex-col items-center gap-1 text-[8px]">
+            <span className="text-[9px] font-light leading-tight whitespace-normal break-words text-stone-700">{label}</span>
             {isManager && (
-              <span className="text-[6px] text-amber-700 font-semibold" role="img" aria-label="manager">
+              <span className="text-[7px] text-amber-700 font-light" role="img" aria-label="manager">
                 👩‍⚕️
               </span>
             )}
             {isNightSpecialist && (
-              <span className="text-[6px] text-indigo-700 font-semibold" role="img" aria-label="moon">
+              <span className="text-[7px] text-stone-600 font-light" role="img" aria-label="moon">
                 🌙
               </span>
             )}
@@ -115,14 +115,14 @@ export default function ScheduleTable({
           return (
             <td
               key={`${nurse}-${date.toISOString()}`}
-              className={`relative overflow-visible border border-gray-300 py-3 px-0.5 text-center text-[9px] font-medium ${
-                highlight ? "border-l-2 border-r-2 border-red-300" : ""
+              className={`relative overflow-visible border border-stone-200/50 py-4 px-1 text-center text-[10px] font-light ${
+                highlight ? "border-l-2 border-r-2 border-amber-300/50" : ""
               } ${
-                isManual ? "ring-1 ring-slate-400" : ""
+                isManual ? "ring-1 ring-amber-400/50" : ""
               }`}
               style={{
-                width: `calc((100% - 70px) / ${dates.length})`,
-                minWidth: '24px',
+                width: `calc((100% - 80px) / ${dates.length})`,
+                minWidth: '28px',
                 backgroundColor: '#ffffff',
                 color: '#1f2937'
               }}
@@ -209,39 +209,44 @@ export default function ScheduleTable({
   };
 
   return (
-    <div className="w-full overflow-x-auto bg-white rounded-lg shadow-lg">
+    <div className="w-full overflow-x-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-stone-900/5 border border-amber-100/50">
       <style>{`
         table.schedule-table tbody td {
           background-color: #ffffff !important;
           color: #1f2937 !important;
         }
       `}</style>
-      <div className="inline-block min-w-full">
+      <div className="p-6">
+        <p className="text-xs uppercase tracking-[0.2em] text-amber-900/60 mb-4 font-light">
+          Monthly Schedule
+        </p>
+      </div>
+      <div className="inline-block min-w-full px-6 pb-6">
         <table className="schedule-table w-full border-collapse text-[8px]" style={{ tableLayout: 'fixed' }}>
           <thead>
-            <tr className="bg-gray-100 border-b-2 border-gray-400">
-              <th className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-200 sticky left-0 z-20 w-[70px] min-w-[70px] max-w-[70px]">
-                <div className="text-[8px]">간호사</div>
+            <tr className="bg-stone-50/80 border-b-2 border-amber-100">
+              <th className="border border-stone-200/50 py-4 px-2 font-light text-center bg-stone-100/50 sticky left-0 z-20 w-[80px] min-w-[80px] max-w-[80px]">
+                <div className="text-[9px] text-stone-700 font-light">간호사</div>
               </th>
               {dates.map((date) => {
                 const highlight = isWeekend(date) || isHolidayDate(date);
                 return (
                   <th
                     key={date.toISOString()}
-                    className={`border border-gray-300 py-3 px-0.5 text-center font-semibold ${
-                      highlight ? "bg-red-50" : "bg-white"
+                    className={`border border-stone-200/50 py-4 px-1 text-center font-light ${
+                      highlight ? "bg-amber-50/80" : "bg-white"
                     }`}
                     style={{
-                      width: `calc((100% - 35px) / ${dates.length})`,
-                      minWidth: '24px'
+                      width: `calc((100% - 80px) / ${dates.length})`,
+                      minWidth: '28px'
                     }}
                   >
-                    <div className="text-[9px] font-bold leading-tight">
+                    <div className="text-[10px] font-light text-stone-900 leading-tight mb-0.5">
                       {format(date, 'd')}
                     </div>
                     <div
-                      className={`text-[8px] leading-tight ${
-                        highlight ? 'text-red-600 font-bold' : 'text-gray-600'
+                      className={`text-[8px] leading-tight font-light ${
+                        highlight ? 'text-amber-700' : 'text-stone-500'
                       }`}
                     >
                       {weekdayNames[date.getDay()].charAt(0)}
@@ -257,13 +262,13 @@ export default function ScheduleTable({
         </table>
       </div>
 
-      <div className="p-2 border-t border-gray-300 bg-gray-50">
-        <div className="flex flex-wrap items-center gap-2 text-[10px]">
-          <span className="font-semibold">범례:</span>
+      <div className="p-5 border-t border-amber-100/50 bg-stone-50/30 rounded-b-3xl">
+        <div className="flex flex-wrap items-center gap-4 text-[11px]">
+          <span className="font-light text-stone-600 uppercase tracking-wider">범례:</span>
           {SHIFT_OPTIONS.map((option) => (
-            <div key={option} className="flex items-center gap-1">
-              <div className={`w-3 h-3 rounded border ${SHIFT_COLORS[option]}`} />
-              <span>{SHIFT_LABELS[option]}</span>
+            <div key={option} className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded border-2 border-stone-200 ${SHIFT_COLORS[option]}`} />
+              <span className="text-stone-700 font-light">{SHIFT_LABELS[option]}</span>
             </div>
           ))}
         </div>
