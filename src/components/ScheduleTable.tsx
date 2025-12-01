@@ -21,11 +21,11 @@ const SHIFT_LABELS: Record<ShiftType, string> = {
   OFF: "OFF",
 };
 const SHIFT_COLORS: Record<ShiftType, string> = {
-  DAY: "bg-blue-100 text-blue-800 border-blue-300",
-  "MID-DAY": "bg-green-100 text-green-800 border-green-300",
-  EVENING: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  NIGHT: "bg-purple-100 text-purple-800 border-purple-300",
-  OFF: "bg-gray-100 text-gray-600 border-gray-300",
+  DAY: "bg-white text-gray-800 border-gray-300",
+  "MID-DAY": "bg-white text-gray-800 border-gray-300",
+  EVENING: "bg-white text-gray-800 border-gray-300",
+  NIGHT: "bg-white text-gray-800 border-gray-300",
+  OFF: "bg-white text-gray-800 border-gray-300",
 };
 
 const weekdayNames = ["일", "월", "화", "수", "목", "금", "토"];
@@ -84,9 +84,7 @@ export default function ScheduleTable({
     return (
       <tr
         key={nurse}
-        className={`border-b border-gray-300 hover:bg-gray-50 ${
-          index % 2 === 0 ? "bg-white" : "bg-gray-50"
-        }`}
+        className={`border-b border-gray-300 hover:bg-gray-50 bg-white`}
       >
         <td className="border border-gray-300 py-3 px-1 font-bold text-center bg-gray-100 sticky left-0 z-10 w-[70px] min-w-[70px] max-w-[70px]">
           <div className="flex flex-col items-center gap-0.5 text-[8px]">
