@@ -65,12 +65,24 @@ function getWeekNumber(date: Date, monthStart: Date): number {
   return Math.floor(daysDiff / 7);
 }
 
-// 연속적인 주 번호 계산 (1월 1일을 기준으로 연속 계산)
+// 연속적인 주 번호 계산 (월요일을 기준으로 주를 계산)
+// 전역 기준점(2020-01-06 월요일)을 사용하여 연도 경계를 넘어서도 연속적인 주 번호 보장
 function getContinuousWeekNumber(date: Date): number {
-  const yearStart = new Date(date.getFullYear(), 0, 1);
+  // 날짜를 복사 (원본 수정 방지)
+  const d = new Date(date);
+  // 요일 구하기 (0=일요일, 1=월요일, ..., 6=토요일)
+  const dayOfWeek = d.getDay();
+  // 월요일까지의 일수 계산 (월요일이 0일)
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  // 해당 주의 월요일로 이동
+  d.setDate(d.getDate() - daysToMonday);
+  // 전역 기준점: 2020년 1월 6일 월요일 (임의의 월요일)
+  const baseMonday = new Date(2020, 0, 6); // 2020-01-06은 월요일
+  // 기준 월요일과 해당 주의 월요일 사이의 일수 차이
   const daysDiff = Math.floor(
-    (date.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
+    (d.getTime() - baseMonday.getTime()) / (1000 * 60 * 60 * 24),
   );
+  // 주 번호 계산 (음수도 가능하므로 절대값 사용하지 않음)
   return Math.floor(daysDiff / 7);
 }
 
@@ -161,18 +173,22 @@ export function generateSchedule(
   const efWeeklyShiftCache = new Map<number, { eShift: ShiftType; fShift: ShiftType }>();
 
   // E, F 간호사 주 단위 shift 결정 함수
+  // 고정된 기준점을 사용하여 연도 경계를 넘어서도 일관된 패턴 유지
+  // 2024년 12월 1일이 속한 주에서 E가 EVENING으로 시작하도록 설정
   const getEFWeeklyShift = (continuousWeekNumber: number): { eShift: ShiftType; fShift: ShiftType } => {
     if (efWeeklyShiftCache.has(continuousWeekNumber)) {
       return efWeeklyShiftCache.get(continuousWeekNumber)!;
     }
-    // 12월 1일이 속한 주를 기준으로 E가 EVENING으로 시작하도록 설정
-    const decemberStartWeek = getContinuousWeekNumber(new Date(year, 11, 1));
-    // 12월 1일 주가 홀수면 오프셋 0, 짝수면 오프셋 1 (E가 EVENING으로 시작하도록)
-    const offset = decemberStartWeek % 2 === 0 ? 1 : 0;
-    const adjustedWeekNumber = continuousWeekNumber + offset;
-    const isEvenWeek = adjustedWeekNumber % 2 === 0;
-    const eShift: ShiftType = isEvenWeek ? "DAY" : "EVENING";
-    const fShift: ShiftType = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대
+    // 고정 기준점: 2024년 12월 1일이 속한 주 번호
+    // 이 기준점을 사용하여 연도 경계를 넘어서도 일관된 패턴 유지
+    const baseDecemberWeek = getContinuousWeekNumber(new Date(2024, 11, 1)); // 2024년 12월 1일
+    // 기준 주에서 E가 EVENING이므로, 주 번호 차이에 따라 결정
+    // 기준 주와의 차이가 짝수면 E는 EVENING, 홀수면 E는 DAY
+    const weekDiff = continuousWeekNumber - baseDecemberWeek;
+    // 주 번호 차이가 짝수면 E는 EVENING, 홀수면 DAY
+    // weekDiff % 2 === 0 → E=EVENING, weekDiff % 2 === 1 → E=DAY
+    const eShift: ShiftType = (weekDiff % 2 === 0) ? "EVENING" : "DAY";
+    const fShift: ShiftType = (weekDiff % 2 === 0) ? "DAY" : "EVENING"; // F는 E와 반대
     const shift = { eShift, fShift };
     efWeeklyShiftCache.set(continuousWeekNumber, shift);
     return shift;
