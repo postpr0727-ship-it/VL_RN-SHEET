@@ -133,20 +133,19 @@ function App() {
   const handleSaveSchedule = useCallback(
     async (name: string) => {
       try {
-        await saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs);
+        const result = await saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs);
         setShowSaveDialog(false);
         
-        // API 연결 상태 확인
-        try {
-          const testResponse = await fetch('/api/health');
-          const testData = await testResponse.json();
-          if (testData.firebase === 'connected') {
-            alert("✅ 근무표가 Firebase에 저장되었습니다.\n\n모든 브라우저와 기기에서 접근할 수 있습니다.");
-          } else {
-            alert("⚠️ 근무표가 저장되었지만 Firebase 연결에 문제가 있습니다.\n\n현재 브라우저에만 저장되었습니다.\n\n브라우저 개발자 도구(F12)의 Console 탭에서 오류를 확인하세요.");
-          }
-        } catch {
-          alert("⚠️ 근무표가 저장되었지만 Firebase 연결을 확인할 수 없습니다.\n\n브라우저 개발자 도구(F12)의 Console 탭에서 오류를 확인하세요.");
+        if (result.savedToFirebase) {
+          alert("✅ 근무표가 Firebase에 저장되었습니다.\n\n모든 브라우저와 기기에서 접근할 수 있습니다.");
+        } else {
+          alert(
+            "⚠️ 근무표가 이 브라우저에만 저장되었습니다.\n\n" +
+            "다른 브라우저에서는 보이지 않습니다.\n\n" +
+            "Firebase 설정을 완료하면 모든 브라우저에서 접근할 수 있습니다.\n\n" +
+            `오류: ${result.error || 'Firebase 연결 실패'}\n\n` +
+            "해결 방법: FIREBASE_SETUP_GUIDE.md 파일을 참조하세요."
+          );
         }
       } catch (error) {
         console.error('저장 오류:', error);

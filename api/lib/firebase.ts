@@ -60,8 +60,27 @@ function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | 
         }
       }
       
-      const error = new Error('Firebase 환경 변수가 설정되지 않았습니다. FIREBASE_SERVICE_ACCOUNT 또는 (FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL) 중 하나가 필요합니다.');
+      // 환경 변수 디버깅 정보 추가
+      const hasServiceAccount = !!process.env.FIREBASE_SERVICE_ACCOUNT;
+      const hasProjectId = !!process.env.FIREBASE_PROJECT_ID;
+      const hasPrivateKey = !!process.env.FIREBASE_PRIVATE_KEY;
+      const hasClientEmail = !!process.env.FIREBASE_CLIENT_EMAIL;
+      
+      const error = new Error(
+        `Firebase 환경 변수가 설정되지 않았습니다.\n` +
+        `- FIREBASE_SERVICE_ACCOUNT: ${hasServiceAccount ? '있음' : '없음'}\n` +
+        `- FIREBASE_PROJECT_ID: ${hasProjectId ? '있음' : '없음'}\n` +
+        `- FIREBASE_PRIVATE_KEY: ${hasPrivateKey ? '있음' : '없음'}\n` +
+        `- FIREBASE_CLIENT_EMAIL: ${hasClientEmail ? '있음' : '없음'}\n\n` +
+        `해결 방법: Vercel Dashboard > Settings > Environment Variables에서 FIREBASE_SERVICE_ACCOUNT를 설정하고 재배포하세요.`
+      );
       initializationError = error;
+      console.error('Firebase 환경 변수 상태:', {
+        FIREBASE_SERVICE_ACCOUNT: hasServiceAccount ? '설정됨' : '없음',
+        FIREBASE_PROJECT_ID: hasProjectId ? '설정됨' : '없음',
+        FIREBASE_PRIVATE_KEY: hasPrivateKey ? '설정됨' : '없음',
+        FIREBASE_CLIENT_EMAIL: hasClientEmail ? '설정됨' : '없음',
+      });
       return { db: null, error };
     } catch (error) {
       const err = error instanceof Error ? error : new Error('알 수 없는 Firebase 초기화 오류');

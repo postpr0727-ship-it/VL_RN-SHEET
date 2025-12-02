@@ -79,7 +79,7 @@ export async function saveSchedule(
   manualEdits: Record<string, ShiftType>,
   nurseLabels: Record<NurseType, string>,
   nurseConfigs?: NurseConfig[]
-): Promise<SavedSchedule> {
+): Promise<{ schedule: SavedSchedule; savedToFirebase: boolean; error?: string }> {
   const savedSchedule: SavedSchedule = {
     id: `${year}-${month}-${Date.now()}`,
     name,
@@ -100,20 +100,25 @@ export async function saveSchedule(
     }
     const result = await saveScheduleToAPI(apiData);
     console.log('✅ API 저장 성공:', result);
-    return transformScheduleFromAPI(result);
+    return {
+      schedule: transformScheduleFromAPI(result),
+      savedToFirebase: true,
+    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
     console.error('❌ API 저장 실패, localStorage로 fallback:', errorMessage);
     console.error('상세 오류:', error);
     
-    // 사용자에게 알림 (선택사항 - 너무 자주 뜨면 주석 처리)
-    // alert(`⚠️ Firebase 연결 실패\n\n근무표는 이 브라우저에만 저장됩니다.\n다른 브라우저에서는 보이지 않습니다.\n\n오류: ${errorMessage}`);
-    
     // localStorage로 fallback
     const saved = getSavedSchedulesFromLocalStorage();
     saved.push(savedSchedule);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    return savedSchedule;
+    
+    return {
+      schedule: savedSchedule,
+      savedToFirebase: false,
+      error: errorMessage,
+    };
   }
 }
 
