@@ -38,3 +38,4 @@ const buffer = canvas.toBuffer('image/png');
 fs.writeFileSync('public/og-image.png', buffer);
 console.log('✅ og-image.png 파일이 생성되었습니다!');
 
+

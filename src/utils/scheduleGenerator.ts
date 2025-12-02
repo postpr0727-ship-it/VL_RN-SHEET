@@ -65,6 +65,15 @@ function getWeekNumber(date: Date, monthStart: Date): number {
   return Math.floor(daysDiff / 7);
 }
 
+// 연속적인 주 번호 계산 (1월 1일을 기준으로 연속 계산)
+function getContinuousWeekNumber(date: Date): number {
+  const yearStart = new Date(date.getFullYear(), 0, 1);
+  const daysDiff = Math.floor(
+    (date.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  return Math.floor(daysDiff / 7);
+}
+
 export function generateSchedule(
   year: number,
   month: number,
@@ -170,9 +179,14 @@ export function generateSchedule(
     }
 
     // E, F 간호사는 격주로 DAY/EVENING을 고정 패턴으로 번갈아 근무
-    // 12월에는 E가 EVENING으로 시작하도록 조정
-    const monthOffset = month === 12 ? 1 : 0; // 12월이면 오프셋 1 추가
-    const adjustedWeekNumber = weekNumber + monthOffset;
+    // 연속적인 주 번호를 사용하여 월 경계에서도 패턴이 유지되도록 함
+    const continuousWeekNumber = getContinuousWeekNumber(day);
+    // 12월 1일이 속한 주를 기준으로 E가 EVENING으로 시작하도록 설정
+    // 12월 1일 주가 홀수 주면 E는 EVENING으로 시작, 짝수 주면 DAY로 시작
+    const decemberStartWeek = getContinuousWeekNumber(new Date(year, 11, 1));
+    // 12월 1일 주가 홀수면 오프셋 0, 짝수면 오프셋 1 (E가 EVENING으로 시작하도록)
+    const offset = decemberStartWeek % 2 === 0 ? 1 : 0;
+    const adjustedWeekNumber = continuousWeekNumber + offset;
     const isEvenWeek = adjustedWeekNumber % 2 === 0;
     const eWeekShift = isEvenWeek ? "DAY" : "EVENING";
     const fWeekShift = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대

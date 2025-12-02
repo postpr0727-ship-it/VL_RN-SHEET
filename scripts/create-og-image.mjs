@@ -47,3 +47,4 @@ fs.writeFileSync(outputPath, buffer);
 console.log('✅ og-image.png 파일이 생성되었습니다!');
 console.log(`📍 경로: ${outputPath}`);
 
+
