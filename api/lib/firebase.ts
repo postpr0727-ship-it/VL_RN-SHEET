@@ -1,14 +1,14 @@
 import admin from 'firebase-admin';
 
-let db: admin.firestore.Firestore | null = null;
+let firestoreDb: admin.firestore.Firestore | null = null;
 let initializationError: Error | null = null;
 let isInitializing = false;
 
 // Firebase Admin 초기화 (환경 변수에서 서비스 계정 정보 가져오기)
 function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | { db: null; error: Error } {
   // 이미 초기화되었으면 반환
-  if (db) {
-    return { db, error: null };
+  if (firestoreDb) {
+    return { db: firestoreDb, error: null };
   }
 
   // 이미 오류가 있었으면 반환
@@ -30,9 +30,9 @@ function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | 
     // 이미 앱이 초기화되어 있으면
     if (admin.apps.length > 0) {
       try {
-        db = admin.firestore();
+        firestoreDb = admin.firestore();
         isInitializing = false;
-        return { db, error: null };
+        return { db: firestoreDb, error: null };
       } catch (err) {
         const error = new Error(`Firestore 초기화 오류: ${err instanceof Error ? err.message : '알 수 없는 오류'}`);
         initializationError = error;
@@ -64,9 +64,9 @@ function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | 
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccountJson),
         });
-        db = admin.firestore();
+        firestoreDb = admin.firestore();
         isInitializing = false;
-        return { db, error: null };
+        return { db: firestoreDb, error: null };
       } catch (parseError) {
         const error = new Error(
           `Firebase 서비스 계정 설정 오류: ${parseError instanceof Error ? parseError.message : '알 수 없는 오류'}`
@@ -92,9 +92,9 @@ function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | 
             clientEmail,
           }),
         });
-        db = admin.firestore();
+        firestoreDb = admin.firestore();
         isInitializing = false;
-        return { db, error: null };
+        return { db: firestoreDb, error: null };
       } catch (certError) {
         const error = new Error(`Firebase 인증서 오류: ${certError instanceof Error ? certError.message : '알 수 없는 오류'}`);
         initializationError = error;
@@ -144,14 +144,4 @@ function initializeFirebase(): { db: admin.firestore.Firestore; error: null } | 
 export function getFirestore(): { db: admin.firestore.Firestore; error: null } | { db: null; error: Error } {
   return initializeFirebase();
 }
-
-// 기존 코드 호환성을 위한 export (오류 처리 포함)
-export const db = (() => {
-  const result = initializeFirebase();
-  if (result.error) {
-    // 오류가 있으면 더미 객체 반환 (실제 사용 시 오류 발생)
-    return null as any;
-  }
-  return result.db;
-})();
 
