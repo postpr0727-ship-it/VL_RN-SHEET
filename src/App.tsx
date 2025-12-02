@@ -135,10 +135,23 @@ function App() {
       try {
         await saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs);
         setShowSaveDialog(false);
-        alert("근무표가 저장되었습니다.");
+        
+        // API 연결 상태 확인
+        try {
+          const testResponse = await fetch('/api/health');
+          const testData = await testResponse.json();
+          if (testData.firebase === 'connected') {
+            alert("✅ 근무표가 Firebase에 저장되었습니다.\n\n모든 브라우저와 기기에서 접근할 수 있습니다.");
+          } else {
+            alert("⚠️ 근무표가 저장되었지만 Firebase 연결에 문제가 있습니다.\n\n현재 브라우저에만 저장되었습니다.\n\n브라우저 개발자 도구(F12)의 Console 탭에서 오류를 확인하세요.");
+          }
+        } catch {
+          alert("⚠️ 근무표가 저장되었지만 Firebase 연결을 확인할 수 없습니다.\n\n브라우저 개발자 도구(F12)의 Console 탭에서 오류를 확인하세요.");
+        }
       } catch (error) {
         console.error('저장 오류:', error);
-        alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+        const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+        alert(`❌ 저장 중 오류가 발생했습니다.\n\n오류: ${errorMessage}\n\n브라우저 개발자 도구(F12)의 Console 탭에서 상세 오류를 확인하세요.`);
       }
     },
     [year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs]

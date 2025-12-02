@@ -99,9 +99,16 @@ export async function saveSchedule(
       apiData.nurseConfigs = nurseConfigs;
     }
     const result = await saveScheduleToAPI(apiData);
+    console.log('✅ API 저장 성공:', result);
     return transformScheduleFromAPI(result);
   } catch (error) {
-    console.warn('API 저장 실패, localStorage로 fallback:', error);
+    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+    console.error('❌ API 저장 실패, localStorage로 fallback:', errorMessage);
+    console.error('상세 오류:', error);
+    
+    // 사용자에게 알림 (선택사항 - 너무 자주 뜨면 주석 처리)
+    // alert(`⚠️ Firebase 연결 실패\n\n근무표는 이 브라우저에만 저장됩니다.\n다른 브라우저에서는 보이지 않습니다.\n\n오류: ${errorMessage}`);
+    
     // localStorage로 fallback
     const saved = getSavedSchedulesFromLocalStorage();
     saved.push(savedSchedule);
@@ -114,9 +121,12 @@ export async function getSavedSchedules(): Promise<SavedSchedule[]> {
   try {
     // API에서 가져오기 시도
     const schedules = await getSchedules() as SavedSchedule[];
+    console.log('✅ API 조회 성공:', schedules.length, '개');
     return schedules.map(transformScheduleFromAPI);
   } catch (error) {
-    console.warn('API 조회 실패, localStorage로 fallback:', error);
+    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+    console.error('❌ API 조회 실패, localStorage로 fallback:', errorMessage);
+    console.error('상세 오류:', error);
     // localStorage로 fallback
     return getSavedSchedulesFromLocalStorage();
   }

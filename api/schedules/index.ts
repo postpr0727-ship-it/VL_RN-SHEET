@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { db } from '../lib/firebase';
+import { getFirestore } from '../lib/firebase';
 import type { SavedSchedule } from '../lib/types';
 
 export default async function handler(
@@ -18,6 +18,17 @@ export default async function handler(
   }
 
   try {
+    // Firebase 초기화 및 연결 확인
+    const { db, error: firebaseError } = getFirestore();
+    
+    if (firebaseError || !db) {
+      return res.status(500).json({
+        error: 'Firebase 초기화 오류',
+        details: firebaseError?.message || 'Firebase 데이터베이스를 초기화할 수 없습니다.',
+        hint: 'Vercel Dashboard > Settings > Environment Variables에서 FIREBASE_SERVICE_ACCOUNT 환경 변수를 확인하고, 재배포하세요.',
+      });
+    }
+    
     const schedulesRef = db.collection('schedules');
 
     if (req.method === 'GET') {
@@ -63,10 +74,21 @@ export default async function handler(
     res.status(405).json({ error: '허용되지 않는 메서드입니다.' });
   } catch (error) {
     console.error('API 오류:', error);
-    res.status(500).json({ 
-      error: '서버 오류가 발생했습니다.',
-      details: error instanceof Error ? error.message : '알 수 없는 오류'
-    });
+    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+    
+    // Firebase 초기화 오류인지 확인
+    if (errorMessage.includes('Firebase') || errorMessage.includes('환경 변수')) {
+      res.status(500).json({ 
+        error: 'Firebase 연결 오류',
+        details: errorMessage,
+        hint: 'FIREBASE_SERVICE_ACCOUNT 환경 변수가 올바르게 설정되었는지 확인하세요. Vercel Dashboard > Settings > Environment Variables에서 확인하세요.'
+      });
+    } else {
+      res.status(500).json({ 
+        error: '서버 오류가 발생했습니다.',
+        details: errorMessage
+      });
+    }
   }
 }
 
