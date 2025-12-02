@@ -10,19 +10,8 @@ import { generateSchedule } from "./utils/scheduleGenerator";
 import { exportToExcel } from "./utils/excelExporter";
 import { saveSchedule } from "./utils/scheduleStorage";
 import { getHolidayDates } from "./utils/holidays";
-import { loadNurseConfigs, saveNurseConfigs, getDefaultNurses } from "./utils/nurseStorage";
+import { loadNurseConfigs, saveNurseConfigs } from "./utils/nurseStorage";
 import type { VacationDay, ShiftType, NurseType, ScheduleEntry, SavedSchedule, NurseConfig } from "./types";
-
-const DEFAULT_NURSE_LABELS: Record<NurseType, string> = {
-  A: "A 간호사",
-  B: "B 간호사",
-  C: "C 간호사",
-  D: "D 간호사",
-  E: "E 간호사",
-  F: "F 간호사",
-  G: "G 간호사",
-  H: "H 간호사",
-};
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -157,7 +146,7 @@ function App() {
       // 근무표 데이터 복원
       setVacations(savedSchedule.vacations);
       setManualEdits(savedSchedule.manualEdits);
-      setNurseLabels(savedSchedule.nurseLabels);
+      // nurseLabels는 nurseConfigs에서 자동으로 계산되므로 별도 설정 불필요
       // 근무표 재생성 트리거 (날짜가 변경되면 자동으로 재생성됨)
       setRefreshKey((prev) => prev + 1);
       setShowLoadDialog(false);
