@@ -157,6 +157,27 @@ export function generateSchedule(
   const weeklyOffCount = new Map<NurseType, number>(); // 각 간호사별 현재 주의 OFF 횟수
   let currentWeek = -1;
 
+  // E, F 간호사의 주 단위 shift 캐시 (주 번호를 키로 하여 한 주의 모든 평일에 동일한 shift 보장)
+  const efWeeklyShiftCache = new Map<number, { eShift: ShiftType; fShift: ShiftType }>();
+
+  // E, F 간호사 주 단위 shift 결정 함수
+  const getEFWeeklyShift = (continuousWeekNumber: number): { eShift: ShiftType; fShift: ShiftType } => {
+    if (efWeeklyShiftCache.has(continuousWeekNumber)) {
+      return efWeeklyShiftCache.get(continuousWeekNumber)!;
+    }
+    // 12월 1일이 속한 주를 기준으로 E가 EVENING으로 시작하도록 설정
+    const decemberStartWeek = getContinuousWeekNumber(new Date(year, 11, 1));
+    // 12월 1일 주가 홀수면 오프셋 0, 짝수면 오프셋 1 (E가 EVENING으로 시작하도록)
+    const offset = decemberStartWeek % 2 === 0 ? 1 : 0;
+    const adjustedWeekNumber = continuousWeekNumber + offset;
+    const isEvenWeek = adjustedWeekNumber % 2 === 0;
+    const eShift: ShiftType = isEvenWeek ? "DAY" : "EVENING";
+    const fShift: ShiftType = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대
+    const shift = { eShift, fShift };
+    efWeeklyShiftCache.set(continuousWeekNumber, shift);
+    return shift;
+  };
+
   // 각 날짜별로 근무표 생성
   for (const day of days) {
     const isWeekendOrHolidayDay = isWeekendOrHoliday(day);
@@ -180,16 +201,9 @@ export function generateSchedule(
 
     // E, F 간호사는 격주로 DAY/EVENING을 고정 패턴으로 번갈아 근무
     // 연속적인 주 번호를 사용하여 월 경계에서도 패턴이 유지되도록 함
+    // 한 주의 모든 평일에 동일한 shift를 보장하기 위해 캐시 사용
     const continuousWeekNumber = getContinuousWeekNumber(day);
-    // 12월 1일이 속한 주를 기준으로 E가 EVENING으로 시작하도록 설정
-    // 12월 1일 주가 홀수 주면 E는 EVENING으로 시작, 짝수 주면 DAY로 시작
-    const decemberStartWeek = getContinuousWeekNumber(new Date(year, 11, 1));
-    // 12월 1일 주가 홀수면 오프셋 0, 짝수면 오프셋 1 (E가 EVENING으로 시작하도록)
-    const offset = decemberStartWeek % 2 === 0 ? 1 : 0;
-    const adjustedWeekNumber = continuousWeekNumber + offset;
-    const isEvenWeek = adjustedWeekNumber % 2 === 0;
-    const eWeekShift = isEvenWeek ? "DAY" : "EVENING";
-    const fWeekShift = isEvenWeek ? "EVENING" : "DAY"; // F는 E와 반대
+    const { eShift: eWeekShift, fShift: fWeekShift } = getEFWeeklyShift(continuousWeekNumber);
 
     // 해당 날짜의 근무 배정
     const dayAssignments = new Map<ShiftType, NurseType[]>();
