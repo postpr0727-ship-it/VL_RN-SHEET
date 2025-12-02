@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from '../lib/mongodb';
+import { db } from '../lib/firebase';
 import type { SavedSchedule } from '../lib/types';
 
 export default async function handler(
@@ -18,48 +18,44 @@ export default async function handler(
   }
 
   try {
-    const { db } = await connectToDatabase();
-    const collection = db.collection<SavedSchedule>('schedules');
+    const schedulesRef = db.collection('schedules');
 
     if (req.method === 'GET') {
       // 모든 저장된 근무표 목록 가져오기
-      const schedules = await collection
-        .find({})
-        .sort({ createdAt: -1 })
-        .toArray();
+      const snapshot = await schedulesRef
+        .orderBy('createdAt', 'desc')
+        .get();
 
-      // MongoDB _id를 id로 변환 (기존 id가 없으면 _id 사용)
-      const schedulesFormatted = schedules.map(({ _id, ...schedule }) => ({
-        ...schedule,
-        id: schedule.id || _id?.toString() || '',
-      }));
+      const schedules = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as SavedSchedule[];
 
-      res.status(200).json(schedulesFormatted);
+      res.status(200).json(schedules);
       return;
     }
 
     if (req.method === 'POST') {
       // 새로운 근무표 저장
-      const scheduleData: Omit<SavedSchedule, '_id'> = req.body;
+      const scheduleData: Omit<SavedSchedule, 'id'> = req.body;
 
       if (!scheduleData.name || !scheduleData.year || !scheduleData.month) {
         res.status(400).json({ error: '필수 필드가 누락되었습니다.' });
         return;
       }
 
-      const newSchedule: SavedSchedule = {
+      const newSchedule = {
         ...scheduleData,
         createdAt: scheduleData.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      const result = await collection.insertOne(newSchedule);
+      // Firebase Firestore에 문서 추가
+      const docRef = await schedulesRef.add(newSchedule);
 
-      // MongoDB _id를 id로 포함 (기존 id가 없으면 _id 사용)
       res.status(201).json({
         ...newSchedule,
-        id: newSchedule.id || result.insertedId.toString(),
-        _id: result.insertedId.toString(),
+        id: docRef.id,
       });
       return;
     }

@@ -26,7 +26,6 @@ export interface VacationDay {
 }
 
 export interface SavedSchedule {
-  _id?: string; // MongoDB ObjectId
   id: string;
   name: string;
   year: number;

@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from '../lib/mongodb';
+import { db } from '../lib/firebase';
 import type { SavedSchedule } from '../lib/types';
-import { ObjectId } from 'mongodb';
 
 export default async function handler(
   req: VercelRequest,
@@ -26,46 +25,36 @@ export default async function handler(
   }
 
   try {
-    const { db } = await connectToDatabase();
-    const collection = db.collection<SavedSchedule>('schedules');
-
-    // ObjectId 또는 일반 id로 검색
-    let query: { _id?: ObjectId; id?: string } = {};
-    try {
-      // MongoDB ObjectId 형식인지 확인
-      query._id = new ObjectId(id);
-    } catch {
-      // 일반 id로 검색
-      query.id = id;
-    }
+    const scheduleRef = db.collection('schedules').doc(id);
 
     if (req.method === 'GET') {
       // 특정 근무표 가져오기
-      const schedule = await collection.findOne(query);
+      const doc = await scheduleRef.get();
 
-      if (!schedule) {
+      if (!doc.exists) {
         res.status(404).json({ error: '근무표를 찾을 수 없습니다.' });
         return;
       }
 
-      // MongoDB _id를 id로 변환
-      const formattedSchedule = {
-        ...schedule,
-        id: schedule.id || schedule._id?.toString() || id,
-      };
-      const { _id, ...scheduleWithoutMongoId } = formattedSchedule;
-      res.status(200).json(scheduleWithoutMongoId);
+      const schedule = {
+        id: doc.id,
+        ...doc.data(),
+      } as SavedSchedule;
+
+      res.status(200).json(schedule);
       return;
     }
 
     if (req.method === 'DELETE') {
       // 근무표 삭제
-      const result = await collection.deleteOne(query);
+      const doc = await scheduleRef.get();
 
-      if (result.deletedCount === 0) {
+      if (!doc.exists) {
         res.status(404).json({ error: '근무표를 찾을 수 없습니다.' });
         return;
       }
+
+      await scheduleRef.delete();
 
       res.status(200).json({ message: '근무표가 삭제되었습니다.', deletedId: id });
       return;
@@ -73,6 +62,13 @@ export default async function handler(
 
     if (req.method === 'PUT') {
       // 근무표 업데이트
+      const doc = await scheduleRef.get();
+
+      if (!doc.exists) {
+        res.status(404).json({ error: '근무표를 찾을 수 없습니다.' });
+        return;
+      }
+
       const updateData: Partial<SavedSchedule> = req.body;
       
       const updateDoc = {
@@ -80,29 +76,15 @@ export default async function handler(
         updatedAt: new Date().toISOString(),
       };
 
-      const result = await collection.updateOne(
-        query,
-        { $set: updateDoc }
-      );
+      await scheduleRef.update(updateDoc);
 
-      if (result.matchedCount === 0) {
-        res.status(404).json({ error: '근무표를 찾을 수 없습니다.' });
-        return;
-      }
+      const updated = await scheduleRef.get();
+      const updatedSchedule = {
+        id: updated.id,
+        ...updated.data(),
+      } as SavedSchedule;
 
-      const updated = await collection.findOne(query);
-      if (!updated) {
-        res.status(500).json({ error: '업데이트된 근무표를 가져올 수 없습니다.' });
-        return;
-      }
-
-      // MongoDB _id를 id로 변환
-      const formattedSchedule = {
-        ...updated,
-        id: updated.id || updated._id?.toString() || id,
-      };
-      const { _id, ...scheduleWithoutMongoId } = formattedSchedule;
-      res.status(200).json(scheduleWithoutMongoId);
+      res.status(200).json(updatedSchedule);
       return;
     }
 

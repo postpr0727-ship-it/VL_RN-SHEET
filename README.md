@@ -87,14 +87,16 @@ npm run build
 
 ### 백엔드
 - Vercel Serverless Functions
-- MongoDB Atlas
+- Firebase Firestore
 - Node.js
 
 ## 백엔드 설정
 
-이 프로젝트는 MongoDB Atlas를 데이터베이스로 사용하는 백엔드 서버를 포함합니다. 
+이 프로젝트는 **Firebase Firestore**를 데이터베이스로 사용하는 백엔드 서버를 포함합니다. 
 
 백엔드 설정 방법은 [BACKEND_SETUP.md](./BACKEND_SETUP.md) 파일을 참조하세요.
+
+**🚀 빠른 시작**: Firebase 프로젝트 생성 → 서비스 계정 키 복사 → Vercel 환경 변수 설정 (약 5분 소요)
 
 ### 주요 기능
 - ✅ 근무표 저장/불러오기 (MongoDB)

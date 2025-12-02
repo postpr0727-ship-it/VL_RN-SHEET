@@ -37,15 +37,6 @@ function transformScheduleToAPI(schedule: SavedSchedule): any {
   };
 }
 
-// API 사용 가능 여부 확인
-async function isApiAvailable(): Promise<boolean> {
-  try {
-    await fetch('/api/schedules', { method: 'GET' });
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 // localStorage fallback
 function getSavedSchedulesFromLocalStorage(): SavedSchedule[] {
@@ -122,7 +113,7 @@ export async function saveSchedule(
 export async function getSavedSchedules(): Promise<SavedSchedule[]> {
   try {
     // API에서 가져오기 시도
-    const schedules = await getSchedules();
+    const schedules = await getSchedules() as SavedSchedule[];
     return schedules.map(transformScheduleFromAPI);
   } catch (error) {
     console.warn('API 조회 실패, localStorage로 fallback:', error);
