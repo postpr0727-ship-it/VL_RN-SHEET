@@ -173,17 +173,17 @@ export function generateSchedule(
   const efWeeklyShiftCache = new Map<number, { eShift: ShiftType; fShift: ShiftType }>();
 
   // E, F 간호사 주 단위 shift 결정 함수
-  // 고정된 기준점을 사용하여 연도 경계를 넘어서도 일관된 패턴 유지
-  // 2024년 12월 1일이 속한 주에서 E가 EVENING으로 시작하도록 설정
+  // 고정 기준점: 2025년 12월 1일이 속한 주에서 E가 EVENING으로 시작
+  // 그 이후 주 단위로 자동으로 번갈아가며 배정
   const getEFWeeklyShift = (continuousWeekNumber: number): { eShift: ShiftType; fShift: ShiftType } => {
     if (efWeeklyShiftCache.has(continuousWeekNumber)) {
       return efWeeklyShiftCache.get(continuousWeekNumber)!;
     }
-    // 고정 기준점: 2024년 12월 1일이 속한 주 번호
-    // 이 기준점을 사용하여 연도 경계를 넘어서도 일관된 패턴 유지
-    const baseDecemberWeek = getContinuousWeekNumber(new Date(2024, 11, 1)); // 2024년 12월 1일
-    // 기준 주에서 E가 EVENING이므로, 주 번호 차이에 따라 결정
-    // 기준 주와의 차이가 짝수면 E는 EVENING, 홀수면 E는 DAY
+    // 고정 기준점: 2025년 12월 1일이 속한 주 번호
+    // 이 기준점에서 E가 EVENING으로 시작
+    const baseDecemberWeek = getContinuousWeekNumber(new Date(2025, 11, 1)); // 2025년 12월 1일
+    // 기준 주와의 차이에 따라 E의 shift 결정
+    // 기준 주에서 E가 EVENING이므로, 주 번호 차이가 짝수면 E는 EVENING, 홀수면 E는 DAY
     const weekDiff = continuousWeekNumber - baseDecemberWeek;
     // 주 번호 차이가 짝수면 E는 EVENING, 홀수면 DAY
     // weekDiff % 2 === 0 → E=EVENING, weekDiff % 2 === 1 → E=DAY
