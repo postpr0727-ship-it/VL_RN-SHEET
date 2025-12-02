@@ -47,7 +47,7 @@ export default async function handler(
       let firebaseInitSuccess = false;
       
       try {
-        const { getFirestore } = await import('./lib/firebase');
+        const { getFirestore } = await import('./lib/firebase.js');
         const { db, error } = getFirestore();
         
         if (error) {
