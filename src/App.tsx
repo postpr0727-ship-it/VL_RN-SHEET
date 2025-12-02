@@ -5,11 +5,13 @@ import ScheduleSummary from "./components/ScheduleSummary";
 import VacationInput from "./components/VacationInput";
 import SaveScheduleDialog from "./components/SaveScheduleDialog";
 import SavedSchedulesList from "./components/SavedSchedulesList";
+import NurseManager from "./components/NurseManager";
 import { generateSchedule } from "./utils/scheduleGenerator";
 import { exportToExcel } from "./utils/excelExporter";
 import { saveSchedule } from "./utils/scheduleStorage";
 import { getHolidayDates } from "./utils/holidays";
-import type { VacationDay, ShiftType, NurseType, ScheduleEntry, SavedSchedule } from "./types";
+import { loadNurseConfigs, saveNurseConfigs, getDefaultNurses } from "./utils/nurseStorage";
+import type { VacationDay, ShiftType, NurseType, ScheduleEntry, SavedSchedule, NurseConfig } from "./types";
 
 const DEFAULT_NURSE_LABELS: Record<NurseType, string> = {
   A: "A 간호사",
@@ -27,33 +29,34 @@ function App() {
   const [vacations, setVacations] = useState<VacationDay[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [manualEdits, setManualEdits] = useState<Record<string, ShiftType>>({});
-  const [showNurseEditor, setShowNurseEditor] = useState(false);
   const [showVacationInput, setShowVacationInput] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
-  const [nurseLabels, setNurseLabels] = useState<Record<NurseType, string>>(
-    () => {
-      if (typeof window !== "undefined") {
-        const stored = window.localStorage.getItem("nurseLabels");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored) as Record<NurseType, string>;
-            return { ...DEFAULT_NURSE_LABELS, ...parsed };
-          } catch {
-            // ignore parse errors
-          }
-        }
-      }
-      return { ...DEFAULT_NURSE_LABELS };
-    },
-  );
+  const [showNurseManager, setShowNurseManager] = useState(false);
+  const [nurseConfigs, setNurseConfigs] = useState<NurseConfig[]>(() => {
+    return loadNurseConfigs();
+  });
+  
+  // 간호사 설정이 변경되면 이름도 업데이트
+  const nurseLabels = useMemo(() => {
+    const labels: Record<string, string> = {};
+    nurseConfigs.forEach((config) => {
+      labels[config.id] = config.name;
+    });
+    return labels as Record<NurseType, string>;
+  }, [nurseConfigs]);
+  
+  const handleUpdateNurseConfigs = useCallback((configs: NurseConfig[]) => {
+    setNurseConfigs(configs);
+    saveNurseConfigs(configs);
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
   const baseSchedule = useMemo(() => {
-    return generateSchedule(year, month, vacations);
-  }, [year, month, vacations, refreshKey]);
+    return generateSchedule(year, month, vacations, nurseConfigs);
+  }, [year, month, vacations, refreshKey, nurseConfigs]);
 
   const makeKey = useCallback(
     (nurse: NurseType, date: Date) => `${nurse}-${format(date, "yyyy-MM-dd")}`,
@@ -110,15 +113,6 @@ function App() {
     [makeKey],
   );
 
-  const handleUpdateNurseLabel = useCallback(
-    (nurse: NurseType, value: string) => {
-      setNurseLabels((prev) => ({
-        ...prev,
-        [nurse]: value,
-      }));
-    },
-    [],
-  );
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -248,10 +242,10 @@ function App() {
               연차 입력 {vacations.length > 0 && `(${vacations.length})`}
             </button>
             <button
-              onClick={() => setShowNurseEditor(!showNurseEditor)}
-              className="px-5 py-2.5 rounded-full bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all duration-300 text-sm font-light border border-amber-200/50 hover:border-amber-300"
+              onClick={() => setShowNurseManager(!showNurseManager)}
+              className="px-5 py-2.5 rounded-full bg-purple-50 text-purple-900 hover:bg-purple-100 transition-all duration-300 text-sm font-light border border-purple-200/50 hover:border-purple-300"
             >
-              간호사 이름 설정
+              간호사 관리
             </button>
             <button
               onClick={handleGenerateSchedule}
@@ -300,68 +294,52 @@ function App() {
           </div>
         )}
 
-        {(showVacationInput || showNurseEditor) && (
-          <div className="mb-8 flex flex-wrap gap-6">
-            {showVacationInput && (
-              <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
-                <div className="flex items-start justify-between gap-3 mb-6">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
-                      휴무 관리
-                    </p>
-                    <h3 className="text-2xl font-light text-stone-900">연차 입력</h3>
-                  </div>
-                  <button
-                    onClick={() => setShowVacationInput(false)}
-                    className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <VacationInput
-                  vacations={vacations}
-                  onAddVacation={handleAddVacation}
-                  onRemoveVacation={handleRemoveVacation}
-                  nurseLabels={nurseLabels}
-                />
+        {showNurseManager && (
+          <div className="mb-8">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
+                  간호사 관리
+                </p>
               </div>
-            )}
+              <button
+                onClick={() => setShowNurseManager(false)}
+                className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
+              >
+                ✕
+              </button>
+            </div>
+            <NurseManager
+              nurses={nurseConfigs}
+              onUpdate={handleUpdateNurseConfigs}
+            />
+          </div>
+        )}
 
-            {showNurseEditor && (
-              <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
-                <div className="flex items-start justify-between gap-3 mb-6">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
-                      간호사 정보
-                    </p>
-                    <h3 className="text-2xl font-light text-stone-900">이름 설정</h3>
-                  </div>
-                  <button
-                    onClick={() => setShowNurseEditor(false)}
-                    className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
-                  >
-                    ✕
-                  </button>
+        {showVacationInput && (
+          <div className="mb-8">
+            <div className="flex-1 min-w-[400px] rounded-3xl border border-amber-100/50 bg-white/95 backdrop-blur-sm shadow-xl shadow-stone-900/5 p-6">
+              <div className="flex items-start justify-between gap-3 mb-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
+                    휴무 관리
+                  </p>
+                  <h3 className="text-2xl font-light text-stone-900">연차 입력</h3>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.keys(nurseLabels).map((nurse) => (
-                    <label
-                      key={nurse}
-                      className="flex flex-col text-xs font-medium text-stone-700"
-                    >
-                      {nurse} 간호사
-                      <input
-                        type="text"
-                        value={nurseLabels[nurse as NurseType] ?? nurse}
-                        onChange={(e) => handleUpdateNurseLabel(nurse as NurseType, e.target.value)}
-                        placeholder={`${nurse} 간호사`}
-                        className="mt-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-light text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-300"
-                      />
-                    </label>
-                  ))}
-                </div>
+                <button
+                  onClick={() => setShowVacationInput(false)}
+                  className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
+                >
+                  ✕
+                </button>
               </div>
-            )}
+              <VacationInput
+                vacations={vacations}
+                onAddVacation={handleAddVacation}
+                onRemoveVacation={handleRemoveVacation}
+                nurseLabels={nurseLabels}
+              />
+            </div>
           </div>
         )}
 

@@ -9,6 +9,8 @@ import type {
   NurseType,
   ScheduleEntry,
   VacationDay,
+  NurseConfig,
+  WorkConditionType,
 } from "../types";
 import { isWeekendOrHoliday } from "./holidays";
 
@@ -30,22 +32,31 @@ const WEEKEND_REQUIREMENTS: Record<ShiftType, number> = {
   OFF: 0,
 };
 
-const NURSES: NurseType[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
-
-// 간호사별 가능한 근무 유형
-const NURSE_SHIFTS: Record<
-  NurseType,
-  { weekday: ShiftType[]; weekend: ShiftType[] }
-> = {
-  A: { weekday: ["DAY", "MID-DAY", "OFF"], weekend: ["DAY", "EVENING", "OFF"] },
-  B: { weekday: ["DAY", "MID-DAY", "OFF"], weekend: ["DAY", "EVENING", "OFF"] },
-  C: { weekday: ["DAY", "MID-DAY", "OFF"], weekend: ["DAY", "EVENING", "OFF"] },
-  D: { weekday: ["DAY", "MID-DAY", "OFF"], weekend: ["DAY", "EVENING", "OFF"] },
-  E: { weekday: ["DAY", "EVENING", "OFF"], weekend: ["OFF"] },
-  F: { weekday: ["DAY", "EVENING", "OFF"], weekend: ["OFF"] },
-  G: { weekday: ["NIGHT", "OFF"], weekend: ["NIGHT", "OFF"] },
-  H: { weekday: ["NIGHT", "OFF"], weekend: ["NIGHT", "OFF"] },
-};
+// 근무 조건에 따라 가능한 근무 유형 결정
+function getPossibleShifts(
+  workCondition: WorkConditionType,
+  isWeekend: boolean,
+): ShiftType[] {
+  switch (workCondition) {
+    case "DAYTIME_ONLY":
+      // 주간 전담: 평일은 DAY, MID-DAY, OFF / 주말은 DAY, EVENING, OFF
+      return isWeekend
+        ? ["DAY", "EVENING", "OFF"]
+        : ["DAY", "MID-DAY", "OFF"];
+    case "NIGHT_ONLY":
+      // 야간 전담: NIGHT, OFF만
+      return ["NIGHT", "OFF"];
+    case "DAY_EVENING_ALTERNATE":
+      // 주간/저녁 교대: 평일은 DAY, EVENING, OFF / 주말은 OFF만
+      return isWeekend ? ["OFF"] : ["DAY", "EVENING", "OFF"];
+    case "FLEXIBLE":
+    default:
+      // 유연: 모든 시간대 가능
+      return isWeekend
+        ? ["DAY", "EVENING", "NIGHT", "OFF"]
+        : ["DAY", "MID-DAY", "EVENING", "NIGHT", "OFF"];
+  }
+}
 
 interface NurseStats {
   offCount: number;
@@ -90,16 +101,46 @@ export function generateSchedule(
   year: number,
   month: number,
   vacations: VacationDay[] = [],
+  nurseConfigs: NurseConfig[] = [],
 ): ScheduleEntry[] {
   const startDate = startOfMonth(new Date(year, month - 1));
   const endDate = endOfMonth(new Date(year, month - 1));
   const days = eachDayOfInterval({ start: startDate, end: endDate });
 
+  // 간호사 설정이 없으면 기본 설정 사용
+  const nurses = nurseConfigs.length > 0 
+    ? nurseConfigs.map((c) => c.id as NurseType)
+    : (["A", "B", "C", "D", "E", "F", "G", "H"] as NurseType[]);
+
+  // 간호사별 설정 맵 생성
+  const nurseConfigMap = new Map<string, NurseConfig>();
+  if (nurseConfigs.length > 0) {
+    nurseConfigs.forEach((config) => {
+      nurseConfigMap.set(config.id, config);
+    });
+  }
+
+  // 기본 설정도 맵에 추가 (하위 호환성)
+  if (nurseConfigs.length === 0) {
+    [
+      { id: "A", name: "A 간호사", workCondition: "DAYTIME_ONLY" as WorkConditionType },
+      { id: "B", name: "B 간호사", workCondition: "DAYTIME_ONLY" as WorkConditionType },
+      { id: "C", name: "C 간호사", workCondition: "DAYTIME_ONLY" as WorkConditionType },
+      { id: "D", name: "D 간호사", workCondition: "DAYTIME_ONLY" as WorkConditionType },
+      { id: "E", name: "E 간호사", workCondition: "DAY_EVENING_ALTERNATE" as WorkConditionType },
+      { id: "F", name: "F 간호사", workCondition: "DAY_EVENING_ALTERNATE" as WorkConditionType },
+      { id: "G", name: "G 간호사", workCondition: "NIGHT_ONLY" as WorkConditionType },
+      { id: "H", name: "H 간호사", workCondition: "NIGHT_ONLY" as WorkConditionType },
+    ].forEach((config) => {
+      nurseConfigMap.set(config.id, config);
+    });
+  }
+
   const schedule: ScheduleEntry[] = [];
   const nurseStats = new Map<NurseType, NurseStats>();
 
   // 통계 초기화
-  NURSES.forEach((nurse) => {
+  nurses.forEach((nurse) => {
     nurseStats.set(nurse, {
       offCount: 0,
       weekdayOffCount: 0,
@@ -230,7 +271,7 @@ export function generateSchedule(
     // 연차가 있는 간호사는 OFF로 설정
     const assignedNurses = new Set<NurseType>();
 
-    for (const nurse of NURSES) {
+    for (const nurse of nurses) {
       const vacationKey = `${nurse}-${format(day, "yyyy-MM-dd")}`;
       if (vacationSet.has(vacationKey)) {
         schedule.push({ date: new Date(day), nurse, shift: "OFF" });
@@ -494,12 +535,16 @@ export function generateSchedule(
         let bestNurse: NurseType | null = null;
         let bestScore = -Infinity;
 
-        for (const nurse of NURSES) {
+        for (const nurse of nurses) {
           if (assignedNurses.has(nurse)) continue;
 
-          const possibleShifts = isWeekendOrHolidayDay
-            ? NURSE_SHIFTS[nurse].weekend
-            : NURSE_SHIFTS[nurse].weekday;
+          // 간호사 설정에 따라 가능한 근무 유형 결정
+          const config = nurseConfigMap.get(nurse);
+          const possibleShifts = config
+            ? getPossibleShifts(config.workCondition, isWeekendOrHolidayDay)
+            : isWeekendOrHolidayDay
+            ? ["DAY", "EVENING", "NIGHT", "OFF"]
+            : ["DAY", "MID-DAY", "EVENING", "NIGHT", "OFF"];
 
           if (!possibleShifts.includes(shiftType)) continue;
 
@@ -739,7 +784,7 @@ export function generateSchedule(
 
     // 나머지 간호사들은 OFF 배정 (E, F는 평일에는 이미 배정됨)
     // 주말/공휴일에는 A~D 간호사들의 OFF를 공평하게 분배
-    const unassignedNurses = NURSES.filter((n) => !assignedNurses.has(n));
+    const unassignedNurses = nurses.filter((n) => !assignedNurses.has(n));
 
     if (isWeekendOrHolidayDay) {
       // 주말/공휴일: A~D 간호사들의 OFF를 공평하게 분배
