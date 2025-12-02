@@ -13,16 +13,34 @@ export default function SavedSchedulesList({
   onClose,
 }: SavedSchedulesListProps) {
   const [savedSchedules, setSavedSchedules] = useState<SavedSchedule[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setSavedSchedules(getSavedSchedules());
+    const loadSchedules = async () => {
+      try {
+        setLoading(true);
+        const schedules = await getSavedSchedules();
+        setSavedSchedules(schedules);
+      } catch (error) {
+        console.error('근무표 목록 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSchedules();
   }, []);
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm("저장된 근무표를 삭제하시겠습니까?")) {
-      deleteSavedSchedule(id);
-      setSavedSchedules(getSavedSchedules());
+      try {
+        await deleteSavedSchedule(id);
+        const schedules = await getSavedSchedules();
+        setSavedSchedules(schedules);
+      } catch (error) {
+        console.error('근무표 삭제 실패:', error);
+        alert('삭제 중 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -48,7 +66,11 @@ export default function SavedSchedulesList({
         </button>
       </div>
 
-      {savedSchedules.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-12 text-stone-500">
+          <p className="text-sm font-light">로딩 중...</p>
+        </div>
+      ) : savedSchedules.length === 0 ? (
         <div className="text-center py-12 text-stone-500">
           <p className="text-sm font-light">저장된 근무표가 없습니다.</p>
         </div>

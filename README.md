@@ -78,11 +78,28 @@ npm run build
 
 ## 기술 스택
 
+### 프론트엔드
 - React 19
 - TypeScript
 - Vite
 - Tailwind CSS
 - date-fns
+
+### 백엔드
+- Vercel Serverless Functions
+- MongoDB Atlas
+- Node.js
+
+## 백엔드 설정
+
+이 프로젝트는 MongoDB Atlas를 데이터베이스로 사용하는 백엔드 서버를 포함합니다. 
+
+백엔드 설정 방법은 [BACKEND_SETUP.md](./BACKEND_SETUP.md) 파일을 참조하세요.
+
+### 주요 기능
+- ✅ 근무표 저장/불러오기 (MongoDB)
+- ✅ 여러 기기에서 동일한 데이터 접근
+- ✅ API 기반 저장 (localStorage fallback 지원)
 
 ## 라이선스
 

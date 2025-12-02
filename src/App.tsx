@@ -131,12 +131,17 @@ function App() {
   }, [year]);
 
   const handleSaveSchedule = useCallback(
-    (name: string) => {
-      saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels);
-      setShowSaveDialog(false);
-      alert("근무표가 저장되었습니다.");
+    async (name: string) => {
+      try {
+        await saveSchedule(name, year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs);
+        setShowSaveDialog(false);
+        alert("근무표가 저장되었습니다.");
+      } catch (error) {
+        console.error('저장 오류:', error);
+        alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
     },
-    [year, month, schedule, vacations, manualEdits, nurseLabels]
+    [year, month, schedule, vacations, manualEdits, nurseLabels, nurseConfigs]
   );
 
   const handleLoadSchedule = useCallback(
