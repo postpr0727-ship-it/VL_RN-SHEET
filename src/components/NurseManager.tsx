@@ -4,9 +4,10 @@ import type { NurseConfig, WorkConditionType } from "../types";
 interface NurseManagerProps {
   nurses: NurseConfig[];
   onUpdate: (nurses: NurseConfig[]) => void;
+  onClose: () => void;
 }
 
-export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
+export default function NurseManager({ nurses, onUpdate, onClose }: NurseManagerProps) {
   const [localNurses, setLocalNurses] = useState<NurseConfig[]>(nurses);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
     };
     const updated = [...localNurses, newNurse];
     setLocalNurses(updated);
-    onUpdate(updated);
+    // 저장 버튼에서만 저장되도록 즉시 저장 제거
   };
 
   const handleDeleteNurse = (id: string) => {
@@ -33,7 +34,7 @@ export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
     if (window.confirm("정말로 이 간호사를 삭제하시겠습니까?")) {
       const updated = localNurses.filter((n) => n.id !== id);
       setLocalNurses(updated);
-      onUpdate(updated);
+      // 저장 버튼에서만 저장되도록 즉시 저장 제거
     }
   };
 
@@ -42,7 +43,7 @@ export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
       n.id === id ? { ...n, name } : n,
     );
     setLocalNurses(updated);
-    onUpdate(updated);
+    // 저장 버튼에서만 저장되도록 즉시 저장 제거
   };
 
   const handleUpdateWorkCondition = (
@@ -53,7 +54,17 @@ export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
       n.id === id ? { ...n, workCondition } : n,
     );
     setLocalNurses(updated);
-    onUpdate(updated);
+    // 저장 버튼에서만 저장되도록 즉시 저장 제거
+  };
+
+  const handleSave = () => {
+    onUpdate(localNurses);
+    onClose();
+  };
+
+  const handleCancel = () => {
+    setLocalNurses(nurses); // 원래 상태로 되돌리기
+    onClose();
   };
 
   const getWorkConditionLabel = (condition: WorkConditionType): string => {
@@ -162,6 +173,21 @@ export default function NurseManager({ nurses, onUpdate }: NurseManagerProps) {
           등록된 간호사가 없습니다. "+ 추가" 버튼을 클릭하여 추가하세요.
         </p>
       )}
+
+      <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-stone-200">
+        <button
+          onClick={handleCancel}
+          className="px-6 py-2.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+        >
+          취소
+        </button>
+        <button
+          onClick={handleSave}
+          className="px-6 py-2.5 rounded-full bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors"
+        >
+          저장
+        </button>
+      </div>
     </div>
   );
 }

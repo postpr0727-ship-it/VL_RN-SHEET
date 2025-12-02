@@ -302,22 +302,10 @@ function App() {
 
         {showNurseManager && (
           <div className="mb-8">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-amber-900/90 mb-2 font-medium">
-                  간호사 관리
-                </p>
-              </div>
-              <button
-                onClick={() => setShowNurseManager(false)}
-                className="text-stone-400 hover:text-stone-700 transition-colors text-xl font-light"
-              >
-                ✕
-              </button>
-            </div>
             <NurseManager
               nurses={nurseConfigs}
               onUpdate={handleUpdateNurseConfigs}
+              onClose={() => setShowNurseManager(false)}
             />
           </div>
         )}
